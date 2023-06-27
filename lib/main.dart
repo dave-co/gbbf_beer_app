@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gbbf_beer_app/settings.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,6 +50,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String year = "2023";
 
   void _incrementCounter() {
     setState(() {
@@ -73,7 +75,28 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('Gbbf Beers $year'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: GestureDetector(
+              onTap:(){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Settings(year))
+                ).then((value) => setState(() {
+                  year = value;
+                })
+                );
+              },
+              child: const Icon(
+                Icons.settings,
+                size: 26,
+              )
+
+            )
+          )
+        ],
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
