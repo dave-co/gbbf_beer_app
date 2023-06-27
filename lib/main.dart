@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:gbbf_beer_app/settings.dart';
+import 'package:gbbf_beer_app/saved_state.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'GBBF Beers',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -25,7 +30,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'GBBF Beers'),
     );
   }
 }
@@ -62,9 +67,16 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+  
+  Future<void> saveState() async {
+    final prefs = await SharedPreferences.getInstance();
+    String json = jsonEncode(SavedState(year));
+    prefs.setString("state", json);
+  }
 
   @override
   Widget build(BuildContext context) {
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -78,24 +90,21 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('Gbbf Beers $year'),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: GestureDetector(
-              onTap:(){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Settings(year))
-                ).then((value) => setState(() {
-                  year = value;
-                })
-                );
-              },
-              child: const Icon(
-                Icons.settings,
-                size: 26,
-              )
-
-            )
-          )
+              padding: const EdgeInsets.only(right: 20),
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Settings(year)))
+                        .then((value) => setState(() {
+                              year = value;
+                            }));
+                  },
+                  child: const Icon(
+                    Icons.settings,
+                    size: 26,
+                  )))
         ],
       ),
       body: Center(
@@ -134,5 +143,24 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+  Future _loadSavedState() async {
+    try{
+      final prefs = await SharedPreferences.getInstance();
+      String json = prefs.getString("state") ?? '';
+      if(json.isNotEmpty){
+        SavedState savedState = SavedState.fromJson(jsonDecode(json));
+        year = savedState.year;
+        debugPrint("Saved state loaded");
+      } else {
+        debugPrint("Saved state not found");
+      }
+    } catch(e){
+      debugPrint("Error loading saved state");
+      debugPrint(e.toString());
+
+      const snackBar =SnackBar(content: Text("Error loading saved state"));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 }
