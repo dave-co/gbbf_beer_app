@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:gbbf_beer_app/search_data.dart';
 import 'package:gbbf_beer_app/settings.dart';
+import 'package:gbbf_beer_app/search.dart';
 import 'package:gbbf_beer_app/saved_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,6 +56,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _counter = 0;
   String year = "2023";
+  String searchText = '';
+
+  bool nameSearch = true;
+  bool notesSearch = false;
+  bool brewerySearch = false;
+  bool barSearch = true;
+  bool styleSearch = false;
+  bool countrySearch = false;
+
+  bool showHandpull = true;
+  bool showKeyKeg = true;
+  bool showBottles = false;
+
+  double abvMin = 4;
+  double abvMax = 12;
+
+  bool onlyShowWants = false;
+  bool onlyShowFavourites = false;
+  bool onlyShowTried = false;
 
   @override
   void initState(){
@@ -72,7 +93,24 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       year = newYear;
     });
+  }
 
+  void _searchFieldsResult(SearchData searchData){
+    searchText = searchData.searchText;
+    nameSearch = searchData.nameSearch;
+    notesSearch = searchData.notesSearch;
+    brewerySearch = searchData.brewerySearch;
+    barSearch = searchData.barSearch;
+    styleSearch = searchData.styleSearch;
+    countrySearch = searchData.countrySearch;
+    showHandpull = searchData.showHandpull;
+    showKeyKeg = searchData.showKeyKeg;
+    showBottles = searchData.showBottles;
+    abvMin = searchData.abvMin;
+    abvMax = searchData.abvMax;
+    onlyShowWants = searchData.onlyShowWants;
+    onlyShowFavourites = searchData.onlyShowFavourites;
+    onlyShowTried = searchData.onlyShowTried;
   }
 
   @override
@@ -80,7 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
     useEffect(() {
       saveState();
-    },[year]);
+    },[year, searchText, nameSearch, notesSearch, brewerySearch, barSearch,
+      styleSearch, countrySearch, showHandpull, showKeyKeg, showBottles,
+      abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried]);
 
     // useEffect(() {
     //   // filter beers
@@ -99,13 +139,48 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
+                            builder: (context) => Search(
+                                searchText,
+                                nameSearch,
+                                notesSearch,
+                                brewerySearch,
+                                barSearch,
+                                styleSearch,
+                                countrySearch,
+                                showHandpull,
+                                showKeyKeg,
+                                showBottles,
+                                abvMin,
+                                abvMax,
+                                onlyShowWants,
+                                onlyShowFavourites,
+                                onlyShowTried
+                            )
+                        )
+                    ).then((value) => _searchFieldsResult(value));
+                  },
+                  child: const Icon(
+                    Icons.search,
+                    size: 26,
+                  )
+              )
+          ),
+          Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
                             builder: (context) => Settings(year)))
                         .then((value) => _settingsResult(value));
                   },
                   child: const Icon(
                     Icons.settings,
                     size: 26,
-                  )))
+                  )
+              )
+          )
         ],
       ),
       body: Center(
@@ -149,7 +224,23 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> saveState() async {
     debugPrint("saving state");
     final prefs = await SharedPreferences.getInstance();
-    String json = jsonEncode(SavedState(year));
+    String json = jsonEncode(SavedState(year
+        ,searchText
+        ,nameSearch
+        ,notesSearch
+        ,brewerySearch
+        ,barSearch
+        ,styleSearch
+        ,countrySearch
+        ,showHandpull
+        ,showKeyKeg
+        ,showBottles
+        ,abvMin
+        ,abvMax
+        ,onlyShowWants
+        ,onlyShowFavourites
+        ,onlyShowTried
+    ));
     prefs.setString("state", json);
   }
 
@@ -159,18 +250,47 @@ class _MyHomePageState extends State<MyHomePage> {
       String json = prefs.getString("state") ?? '';
       if(json.isNotEmpty){
         SavedState savedState = SavedState.fromJson(jsonDecode(json));
+        debugPrint("before year");
         year = savedState.year;
+        debugPrint("before searchText");
+        searchText = savedState.searchText;
+        debugPrint("before nameSearch");
+        nameSearch = savedState.nameSearch;
+        debugPrint("before notesSearch");
+        notesSearch = savedState.notesSearch;
+        debugPrint("before brewerySearch");
+        brewerySearch = savedState.brewerySearch;
+        debugPrint("before barSearch");
+        barSearch = savedState.barSearch;
+        debugPrint("before styleSearch");
+        styleSearch = savedState.styleSearch;
+        debugPrint("before countrySearch");
+        countrySearch = savedState.countrySearch;
+        debugPrint("before showHandpull");
+        showHandpull = savedState.showHandpull;
+        debugPrint("before showKeyKeg");
+        showKeyKeg = savedState.showKeyKeg;
+        debugPrint("before showBottles");
+        showBottles = savedState.showBottles;
+        debugPrint("before abvMin");
+        abvMin = savedState.abvMin;
+        debugPrint("before abvMax");
+        abvMax = savedState.abvMax;
+        debugPrint("before onlyShowWants");
+        onlyShowWants = savedState.onlyShowWants;
+        debugPrint("before onlyShowFavourites");
+        onlyShowFavourites = savedState.onlyShowFavourites;
+        debugPrint("before onlyShowTried");
+        onlyShowTried = savedState.onlyShowTried;
         debugPrint("Saved state loaded");
       } else {
-        debugPrint("Saved state not found, using defaults");
-        // use default values
-        year= "2023";
+        debugPrint("Saved state not found");
       }
     } catch(e){
       debugPrint("Error loading saved state");
       debugPrint(e.toString());
 
-      const snackBar =SnackBar(content: Text("Error loading saved state"));
+      const snackBar = SnackBar(content: Text("Error loading saved state"));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }

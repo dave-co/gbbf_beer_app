@@ -10,7 +10,7 @@ class Settings extends StatefulWidget {
 
 class _CreateSettingsState extends State<Settings> {
   static const years = ['2023', '2022'];
-  String year = "2023";
+  late String year;
 
   @override
   void initState(){
