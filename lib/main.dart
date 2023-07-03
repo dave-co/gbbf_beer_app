@@ -1,12 +1,15 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:gbbf_beer_app/beer.dart';
 import 'package:gbbf_beer_app/search_data.dart';
 import 'package:gbbf_beer_app/settings.dart';
 import 'package:gbbf_beer_app/search.dart';
 import 'package:gbbf_beer_app/saved_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'beer_lists.dart';
 
 void main() {
   runApp(const MyApp());
@@ -54,6 +57,7 @@ class MyHomePage extends StatefulHookWidget {
 }
 class _MyHomePageState extends State<MyHomePage> {
 
+  var beers = [];
   int _counter = 0;
   String year = "2023";
   String searchText = '';
@@ -79,7 +83,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState(){
     super.initState();
-    _loadSavedState();
+    _loadSavedState()
+        .then((_) => _loadStaticBeers(year));
+
   }
 
   void _incrementCounter(){
@@ -122,9 +128,9 @@ class _MyHomePageState extends State<MyHomePage> {
       styleSearch, countrySearch, showHandpull, showKeyKeg, showBottles,
       abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried]);
 
-    // useEffect(() {
-    //   // filter beers
-    // },[year]);
+    useEffect(() {
+      _loadStaticBeers(year);
+    },[year]);
 
     return Scaffold(
       appBar: AppBar(
@@ -242,6 +248,21 @@ class _MyHomePageState extends State<MyHomePage> {
         ,onlyShowTried
     ));
     prefs.setString("state", json);
+  }
+
+  void _loadStaticBeers(String yearToLoad) {
+    var sourceList = [];
+    if(yearToLoad == "2023"){
+      sourceList = beers2023;
+    } else if (yearToLoad == "2022"){
+      sourceList = beers2022;
+    }
+    final staticBeers = List.generate(sourceList.length, (index) {
+      var beer = Beer.fromJson(jsonDecode(sourceList[index]));
+      return beer;
+    });
+    debugPrint("found ${staticBeers.length} beers");
+    beers = staticBeers;
   }
 
   Future _loadSavedState() async {
