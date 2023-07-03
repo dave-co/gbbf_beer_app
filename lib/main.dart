@@ -35,8 +35,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class MyHomePage extends StatefulHookWidget {
+   const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -46,43 +46,46 @@ class MyHomePage extends StatefulWidget {
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+   final String title;
+   @override
+   State<StatefulWidget> createState() => _MyHomePageState();
 }
-
 class _MyHomePageState extends State<MyHomePage> {
+
   int _counter = 0;
   String year = "2023";
 
-  void _incrementCounter() {
+  @override
+  void initState(){
+    super.initState();
+    _loadSavedState();
+  }
+
+  void _incrementCounter(){
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
-  
-  Future<void> saveState() async {
-    final prefs = await SharedPreferences.getInstance();
-    String json = jsonEncode(SavedState(year));
-    prefs.setString("state", json);
+
+  void _settingsResult(newYear){
+    debugPrint("returned from settings");
+    setState(() {
+      year = newYear;
+    });
+
   }
 
   @override
   Widget build(BuildContext context) {
 
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    useEffect(() {
+      saveState();
+    },[year]);
+
+    // useEffect(() {
+    //   // filter beers
+    // },[year]);
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -94,12 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
               child: GestureDetector(
                   onTap: () {
                     Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Settings(year)))
-                        .then((value) => setState(() {
-                              year = value;
-                            }));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Settings(year)))
+                        .then((value) => _settingsResult(value));
                   },
                   child: const Icon(
                     Icons.settings,
@@ -144,6 +145,14 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  Future<void> saveState() async {
+    debugPrint("saving state");
+    final prefs = await SharedPreferences.getInstance();
+    String json = jsonEncode(SavedState(year));
+    prefs.setString("state", json);
+  }
+
   Future _loadSavedState() async {
     try{
       final prefs = await SharedPreferences.getInstance();
@@ -153,7 +162,9 @@ class _MyHomePageState extends State<MyHomePage> {
         year = savedState.year;
         debugPrint("Saved state loaded");
       } else {
-        debugPrint("Saved state not found");
+        debugPrint("Saved state not found, using defaults");
+        // use default values
+        year= "2023";
       }
     } catch(e){
       debugPrint("Error loading saved state");
