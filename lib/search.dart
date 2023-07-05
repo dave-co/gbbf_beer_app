@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gbbf_beer_app/search_data.dart';
+import 'package:gbbf_beer_app/util.dart';
 
 class Search extends StatefulWidget {
   final String searchTextParam;
@@ -62,7 +63,7 @@ class _CreateSearchState extends State<Search> {
   // late double abvMin;
   // late double abvMax;
   final int abvDivisions = 13;
-  final double maxAbv = 13;
+  // final double maxAbv = 13;
   RangeValues abvRange = const RangeValues(4, 12);
 
   late bool onlyShowWants;

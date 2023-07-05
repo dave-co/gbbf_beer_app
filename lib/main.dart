@@ -7,9 +7,11 @@ import 'package:gbbf_beer_app/settings.dart';
 import 'package:gbbf_beer_app/search.dart';
 import 'package:gbbf_beer_app/saved_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gbbf_beer_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'beer_lists.dart';
+import 'beer_meta.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,7 +59,9 @@ class MyHomePage extends StatefulHookWidget {
 }
 class _MyHomePageState extends State<MyHomePage> {
 
-  var beers = [];
+  List<Beer> beers = [];
+  var filteredBeers = [];
+  List<BeerMeta> beerMetaData = [];
   int _counter = 0;
   String year = "2023";
   String searchText = '';
@@ -84,8 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState(){
     super.initState();
     _loadSavedState()
-        .then((_) => _loadStaticBeers(year));
-
+        .then((_) {
+          beers = _loadStaticBeers(year);
+          beerMetaData = _createMetaData(beers);
+        });
   }
 
   void _incrementCounter(){
@@ -119,17 +125,54 @@ class _MyHomePageState extends State<MyHomePage> {
     onlyShowTried = searchData.onlyShowTried;
   }
 
+  void _searchBeers(){
+    setState((){
+      filteredBeers = beers.where((beer) {
+        // check abv first, if outside the range we don't care about the rest of the search options
+        if(beer.abv < abvMin || (abvMax != maxAbv && beer.abv > abvMax)){
+          return false;
+        }
+        // now check dispense method
+        if(beer.dispenseMethod == "Handpull" && !showHandpull || beer.dispenseMethod == "KeyKeg" && !showKeyKeg || beer.dispenseMethod == "Bottle" && !showBottles){
+          return false;
+        }
+        BeerMeta beerMeta = beerMetaData[beer.id];
+        if(onlyShowTried == true && !beerMeta.tried){return false;}
+        if(onlyShowWants == true && !beerMeta.want){return false;}
+        if(onlyShowFavourites == true && !beerMeta.favourite){return false;}
+
+        String text = searchText.toLowerCase();
+        if(nameSearch    && beer.name.toLowerCase().contains(text)){return true;}
+        if(notesSearch   && beer.notes.toLowerCase().contains(text)){return true;}
+        if(brewerySearch && beer.brewery.toLowerCase().contains(text)){return true;}
+        if(barSearch     && beer.barCode.toLowerCase().contains(text)){return true;}
+        if(styleSearch   && beer.style.toLowerCase().contains(text)){return true;}
+        if(countrySearch && beer.country.toLowerCase().contains(text)){return true;}
+
+        if(!nameSearch && !notesSearch && !brewerySearch && !barSearch && !styleSearch && !countrySearch){
+          return true;
+        }
+        return false;
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
     useEffect(() {
-      saveState();
-    },[year, searchText, nameSearch, notesSearch, brewerySearch, barSearch,
+      _saveState();
+      _searchBeers();
+      return (){};
+    },[searchText, nameSearch, notesSearch, brewerySearch, barSearch,
       styleSearch, countrySearch, showHandpull, showKeyKeg, showBottles,
       abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried]);
 
     useEffect(() {
       _loadStaticBeers(year);
+      _saveState();
+      _searchBeers();
+      return (){};
     },[year]);
 
     return Scaffold(
@@ -227,7 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<void> saveState() async {
+  Future<void> _saveState() async {
     debugPrint("saving state");
     final prefs = await SharedPreferences.getInstance();
     String json = jsonEncode(SavedState(year
@@ -250,7 +293,18 @@ class _MyHomePageState extends State<MyHomePage> {
     prefs.setString("state", json);
   }
 
-  void _loadStaticBeers(String yearToLoad) {
+  List<BeerMeta> _createMetaData(List<Beer> beers) {
+    final m = List.generate(beers.length, (index) {
+      // TODO may need to change when loading saved metadata
+      return BeerMeta(false);
+    });
+    return m;
+    // setState(() {
+    // });
+  }
+
+
+  List<Beer> _loadStaticBeers(String yearToLoad) {
     var sourceList = [];
     if(yearToLoad == "2023"){
       sourceList = beers2023;
@@ -262,7 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return beer;
     });
     debugPrint("found ${staticBeers.length} beers");
-    beers = staticBeers;
+    return staticBeers;
   }
 
   Future _loadSavedState() async {
