@@ -108,24 +108,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _searchFieldsResult(SearchData searchData){
-    searchText = searchData.searchText;
-    nameSearch = searchData.nameSearch;
-    notesSearch = searchData.notesSearch;
-    brewerySearch = searchData.brewerySearch;
-    barSearch = searchData.barSearch;
-    styleSearch = searchData.styleSearch;
-    countrySearch = searchData.countrySearch;
-    showHandpull = searchData.showHandpull;
-    showKeyKeg = searchData.showKeyKeg;
-    showBottles = searchData.showBottles;
-    abvMin = searchData.abvMin;
-    abvMax = searchData.abvMax;
-    onlyShowWants = searchData.onlyShowWants;
-    onlyShowFavourites = searchData.onlyShowFavourites;
-    onlyShowTried = searchData.onlyShowTried;
+    setState((){
+      searchText = searchData.searchText;
+      nameSearch = searchData.nameSearch;
+      notesSearch = searchData.notesSearch;
+      brewerySearch = searchData.brewerySearch;
+      barSearch = searchData.barSearch;
+      styleSearch = searchData.styleSearch;
+      countrySearch = searchData.countrySearch;
+      showHandpull = searchData.showHandpull;
+      showKeyKeg = searchData.showKeyKeg;
+      showBottles = searchData.showBottles;
+      abvMin = searchData.abvMin;
+      abvMax = searchData.abvMax;
+      onlyShowWants = searchData.onlyShowWants;
+      onlyShowFavourites = searchData.onlyShowFavourites;
+      onlyShowTried = searchData.onlyShowTried;
+    });
   }
 
   void _searchBeers(){
+    debugPrint("_searchBeers called");
     setState((){
       filteredBeers = beers.where((beer) {
         // check abv first, if outside the range we don't care about the rest of the search options
@@ -154,6 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
         }
         return false;
       }).toList();
+      debugPrint('filteredBeers size= ${filteredBeers.length}');
     });
   }
 
@@ -232,41 +236,170 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      body: ListView.builder(
+          itemCount: filteredBeers.length,
+            itemBuilder: (BuildContext context, int i) {
+            var beerId = filteredBeers[i].id;
+              return GestureDetector(
+                onTap: (){
+                  setState(() {
+                    beerMetaData[beerId].showDetail = !beerMetaData[beerId].showDetail;
+                  });
+                },
+                child: Column(
+                  children: [
+                    const Divider(height: 10,),
+                    Row(
+                      children: [
+                        Expanded(
+                            flex: 4,
+                            child: Text(filteredBeers[i].name)
+                        ),
+                        Expanded(
+                            flex: 2,
+                            child: Text('${filteredBeers[i].abv}%')
+                        ),
+                        Expanded(
+                            flex: 2,
+                            child: Text(filteredBeers[i].dispenseMethod)
+                        ),
+                      ],
+                    ),
+                    Row(
+                        children: [
+                          Expanded(
+                              flex: 4,
+                              child: Text('  ${filteredBeers[i].brewery}')
+                          ),
+                          Expanded(
+                              flex: 2,
+                              child: Text(filteredBeers[i].style)
+                          ),
+                          Expanded(
+                              flex: 1,
+                              child: Text(filteredBeers[i].barCode)
+                          ),
+                          Expanded(
+                              flex: 1,
+                              child: Text(_getLabel(beerMetaData[beerId]))
+                          ),
+                        ]),
+                    Visibility(
+                      visible: beerMetaData[beerId].showDetail,
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(child: Text(filteredBeers[i].notes))
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                    flex: 2,
+                                    child: CheckboxListTile(
+                                      title: const Text('Want'),
+                                      value: beerMetaData[beerId].want,
+                                      onChanged: (bool? value){
+                                        setState((){
+                                          beerMetaData[beerId].want = !beerMetaData[beerId].want;
+                                        });
+                                      },
+                                    )
+                                ),
+                                Expanded(
+                                    flex: 2,
+                                    child: CheckboxListTile(
+                                      title: const Text('Tried'),
+                                      value: beerMetaData[beerId].tried,
+                                      onChanged: (bool? value){
+                                        setState((){
+                                          beerMetaData[beerId].tried = !beerMetaData[beerId].tried;
+                                          if(beerMetaData[beerId].tried == true && beerMetaData[beerId].want == true) {
+                                            beerMetaData[beerId].want = false;
+                                          }
+                                        });
+                                      },
+                                    )
+                                ),
+                                Expanded(
+                                    flex: 2,
+                                    child: CheckboxListTile(
+                                      title: const Text('Favourite'),
+                                      contentPadding: const EdgeInsets.all(5),
+                                      value: beerMetaData[beerId].favourite,
+                                      onChanged: (bool? value){
+                                        setState((){
+                                          beerMetaData[beerId].favourite = !beerMetaData[beerId].favourite;
+                                        });
+                                      },
+                                    )
+                                )
+                              ],
+                            ),
+                            Visibility(
+                                visible: beerMetaData[beerId].tried,
+                                child: Row(
+                                    children: _createRatingStars(beerMetaData[beerId], beerId)
+                                )
+                            )
+                          ],
+                        )
+                    )
+                  ],
+                ),
+              );
+            })
+      , // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  String _getLabel(BeerMeta beerMeta){
+    if (beerMeta.favourite == true) {
+      return 'Fave';
+    } else if (beerMeta.tried == true) {
+      return 'Tried';
+    } else if (beerMeta.want == true) {
+      return 'Want';
+    }
+    return '';
+  }
+
+  List<Widget> _createRatingStars(BeerMeta beerMeta, beerId) {
+    List<Widget> stars = [
+      Expanded(flex: 2, child: beerMeta.rating == 0
+          ? const Text('Rating: ')
+          :  GestureDetector(
+        onTap: (){
+          setState(() {
+            beerMetaData[beerId].rating = 0;
+          });
+        },
+        child: const Text('Clear'),
+      )
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      _createStar(1, beerMeta.rating, beerId),
+      _createStar(2, beerMeta.rating, beerId),
+      _createStar(3, beerMeta.rating, beerId),
+      _createStar(4, beerMeta.rating, beerId),
+      _createStar(5, beerMeta.rating, beerId),
+      const Expanded(flex: 2, child: Text(''),)
+    ];
+    return stars;
+  }
+
+  GestureDetector _createStar(int threshold, int rating, int beerId) {
+    return GestureDetector(
+      onTap: (){
+        setState(() {
+          beerMetaData[beerId].rating = threshold;
+        });
+      },
+      child: rating < threshold
+      // ignore: prefer_const_constructors
+          ? Icon(color: Colors.yellow, Icons.star_outline_rounded)
+      // ignore: prefer_const_constructors
+          : Icon(color: Colors.yellow, Icons.star_rate_rounded),
     );
   }
 

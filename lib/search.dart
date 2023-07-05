@@ -117,8 +117,9 @@ class _CreateSearchState extends State<Search> {
           return false;
         },
         child: Scaffold(
+          // resizeToAvoidBottomInset: false,
             appBar: AppBar(title: const Text('Search')),
-            body: Column(
+            body: SingleChildScrollView(child: Column(
               children: [
                 Row(
                   children: [
@@ -357,6 +358,7 @@ class _CreateSearchState extends State<Search> {
                       )
                     ]
                 ),              ],
+            )
             )
         )
     );
