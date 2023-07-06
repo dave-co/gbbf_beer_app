@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Beer> beers = [];
   var filteredBeers = [];
   List<BeerMeta> beerMetaData = [];
-  int _counter = 0;
+
   String year = "2023";
   String searchText = '';
 
@@ -92,12 +92,6 @@ class _MyHomePageState extends State<MyHomePage> {
           beers = _loadStaticBeers(year);
           beerMetaData = _createMetaData(beers);
         });
-  }
-
-  void _incrementCounter(){
-    setState(() {
-      _counter++;
-    });
   }
 
   void _settingsResult(newYear){
@@ -173,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
       abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried]);
 
     useEffect(() {
-      _loadStaticBeers(year);
+      beers = _loadStaticBeers(year);
       _saveState();
       _searchBeers();
       return (){};
@@ -422,6 +416,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ,onlyShowWants
         ,onlyShowFavourites
         ,onlyShowTried
+        ,beerMetaData
     ));
     prefs.setString("state", json);
   }
@@ -448,7 +443,7 @@ class _MyHomePageState extends State<MyHomePage> {
       var beer = Beer.fromJson(jsonDecode(sourceList[index]));
       return beer;
     });
-    debugPrint("found ${staticBeers.length} beers");
+    debugPrint("_loadStaticBeers found ${staticBeers.length} beers");
     return staticBeers;
   }
 
@@ -490,6 +485,8 @@ class _MyHomePageState extends State<MyHomePage> {
         onlyShowFavourites = savedState.onlyShowFavourites;
         debugPrint("before onlyShowTried");
         onlyShowTried = savedState.onlyShowTried;
+        debugPrint("before beerMetaList");
+        beerMetaData = savedState.beerMetaList;
         debugPrint("Saved state loaded");
       } else {
         debugPrint("Saved state not found");

@@ -158,16 +158,19 @@ class _CreateSearchState extends State<Search> {
                                       )
                                   ),
                                   Expanded(
-                                      flex: 1,
+                                      flex: 2,
                                       child: Padding(
                                           padding: const EdgeInsets.only(top: 6, left: 5, right: 8),
-                                          child: GestureDetector(
-                                              onTap: _back,
-                                              child: const Icon(
-                                                Icons.search,
-                                                color: Colors.blue,
-                                                size: 36,
-                                              )
+                                          child: Ink(
+                                            decoration: const ShapeDecoration(
+                                              color: Colors.blue,
+                                              shape: CircleBorder()
+                                            ),
+                                            child: IconButton(
+                                                icon: const Icon(Icons.search, size: 30),
+                                                color: Colors.white,
+                                                onPressed: _back
+                                            )
                                           )
                                       )
                                   )

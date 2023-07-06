@@ -1,3 +1,5 @@
+import 'beer_meta.dart';
+
 class SavedState{
   String year;
   String searchText;
@@ -20,6 +22,8 @@ class SavedState{
   bool onlyShowFavourites;
   bool onlyShowTried;
 
+  List<BeerMeta> beerMetaList;
+
   SavedState(
       this.year,
       this.searchText,
@@ -36,10 +40,12 @@ class SavedState{
       this.abvMax,
       this.onlyShowWants,
       this.onlyShowFavourites,
-      this.onlyShowTried
+      this.onlyShowTried,
+      this.beerMetaList
       );
 
   Map toJson(){
+    List? beerMeta = beerMetaList.map((i) => i.toJson()).toList();
     return {
       "year" : year,
       "searchText": searchText,
@@ -56,10 +62,13 @@ class SavedState{
       "abvMax": abvMax,
       "onlyShowWants": onlyShowWants,
       "onlyShowFavourites": onlyShowFavourites,
-      "onlyShowTried": onlyShowTried
+      "onlyShowTried": onlyShowTried,
+      "beerMeta" : beerMeta
     };
   }
   factory SavedState.fromJson(dynamic json){
+    var beerMetaJsonAll = json['beerMeta'] as List;
+    List<BeerMeta> beerMeta = beerMetaJsonAll.map((beerMetaJson) => BeerMeta.fromJson(beerMetaJson)).toList();
     return SavedState(
         json['year'] as String,
         json['searchText'] as String,
@@ -76,7 +85,8 @@ class SavedState{
         json['abvMax'] as double,
         json['onlyShowWants'] as bool,
         json['onlyShowFavourites'] as bool,
-        json['onlyShowTried'] as bool
+        json['onlyShowTried'] as bool,
+        beerMeta
     );
   }
 }
