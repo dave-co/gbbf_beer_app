@@ -95,30 +95,32 @@ class _CreateSearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
+
+     _back () async {
+      Navigator.pop(
+          context,
+          SearchData(
+              searchTextController.text,
+              nameSearch,
+              notesSearch,
+              brewerySearch,
+              barSearch,
+              styleSearch,
+              countrySearch,
+              showHandpull,
+              showKeyKeg,
+              showBottles,
+              abvRange.start,
+              abvRange.end,
+              onlyShowWants,
+              onlyShowFavourites,
+              onlyShowTried));
+      return false;
+    }
+
     return WillPopScope(
-        onWillPop: () async {
-          Navigator.pop(
-              context,
-              SearchData(
-                  searchTextController.text,
-                  nameSearch,
-                  notesSearch,
-                  brewerySearch,
-                  barSearch,
-                  styleSearch,
-                  countrySearch,
-                  showHandpull,
-                  showKeyKeg,
-                  showBottles,
-                  abvRange.start,
-                  abvRange.end,
-                  onlyShowWants,
-                  onlyShowFavourites,
-                  onlyShowTried));
-          return false;
-        },
+        onWillPop: _back,
         child: Scaffold(
-          // resizeToAvoidBottomInset: false,
             appBar: AppBar(title: const Text('Search')),
             body: SingleChildScrollView(
                 child: Column(
@@ -142,8 +144,15 @@ class _CreateSearchState extends State<Search> {
                                             const EdgeInsets.only(top: 8, left: 5, bottom: 5),
                                         child: TextField(
                                           controller: searchTextController,
-                                          decoration: const InputDecoration(
-                                              border: OutlineInputBorder(),
+                                          decoration: InputDecoration(
+                                            suffixIcon: IconButton(
+                                                onPressed: (){
+                                                  setState(() {
+                                                    searchTextController.text = '';
+                                                  });
+                                                },
+                                                icon: const Icon(Icons.clear)),
+                                              border: const OutlineInputBorder(),
                                               labelText: 'Search for...'),
                                         ),
                                       )
@@ -153,14 +162,10 @@ class _CreateSearchState extends State<Search> {
                                       child: Padding(
                                           padding: const EdgeInsets.only(top: 6, left: 5, right: 8),
                                           child: GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  searchTextController.text = '';
-                                                });
-                                              },
+                                              onTap: _back,
                                               child: const Icon(
-                                                Icons.cancel,
-                                                color: Colors.red,
+                                                Icons.search,
+                                                color: Colors.blue,
                                                 size: 36,
                                               )
                                           )
