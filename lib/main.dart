@@ -560,16 +560,26 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _createRatingStars(BeerMeta beerMeta, beerId) {
     List<Widget> stars = [
       Expanded(flex: 2, child: beerMeta.rating == 0
-          ? const Text('Rating: ')
+          ? const Align(
+            alignment: Alignment.centerRight,
+            child: Text('Rating:'))
           : GestureDetector(
-        onTap: () => _updateMeta(beerId, 'rating', 0),
-        //   onTap: (){
-        //   setState(() {
-        //     beerMetaData[beerId].rating = 0;
-        //   });
-        // },
-        child: const Text('Clear'),
-      )
+              onTap: () => _updateMeta(beerId, 'rating', 0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  margin: const EdgeInsets.only(right: 5),
+                  padding: const EdgeInsets.only(right: 5, left: 5, bottom: 1),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                    border: Border.all(
+                        width: 1,
+                        color: Colors.orange
+                    ),
+                  ),
+                  child: const Text('Clear Rating'))
+              ),
+            )
       ),
       _createStar(1, beerMeta.rating, beerId),
       _createStar(2, beerMeta.rating, beerId),
