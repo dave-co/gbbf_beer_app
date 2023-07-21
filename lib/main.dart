@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:gbbf_beer_app/labelled_checkbox.dart';
 import 'package:gbbf_beer_app/static_beer.dart';
 import 'package:gbbf_beer_app/search_data.dart';
 import 'package:gbbf_beer_app/settings.dart';
@@ -427,52 +428,47 @@ class _MyHomePageState extends State<MyHomePage> {
                           Row(
                             children: [
                               Expanded(
-                                  flex: 2,
-                                  child: CheckboxListTile(
-                                    title: const Text('Want'),
-                                    value: getBeerMeta(beerId).want,
-                                    onChanged: (bool? value) {
-                                      _updateMeta(beerId, 'want',
-                                          !getBeerMeta(beerId).want);
-                                      // setState((){
-                                      //   beerMetaData[beerId].want = !beerMetaData[beerId].want;
-                                      // });
-                                    },
+                                  flex: 1,
+                                  child: Image.asset(
+                                      'assets/images/untappd-512.png',
+                                      height: 30,
+                                      width: 30
                                   )
                               ),
                               Expanded(
                                   flex: 2,
-                                  child: CheckboxListTile(
-                                    title: const Text('Tried'),
-                                    value: getBeerMeta(beerId).tried,
-                                    onChanged: (bool? value) {
-                                      _updateMeta(beerId, 'tried',
-                                          !getBeerMeta(beerId).tried);
-                                      // setState((){
-                                      //   beerMetaData[beerId].tried = !beerMetaData[beerId].tried;
-                                      //   if(beerMetaData[beerId].tried == true && beerMetaData[beerId].want == true) {
-                                      //     beerMetaData[beerId].want = false;
-                                      //   }
-                                      // });
-                                    },
-                                  )
+                                  child: LabelledCheckbox(
+                                      text: const Text("Want", textScaleFactor: 1.1,),
+                                      padding: const EdgeInsets.only(left: 1),
+                                      value: getBeerMeta(beerId).want,
+                                      onChanged: (bool? value) {
+                                        _updateMeta(beerId, 'want',
+                                            !getBeerMeta(beerId).want);
+                                      })
                               ),
                               Expanded(
                                   flex: 2,
-                                  child: CheckboxListTile(
-                                    title: const Text('Favourite'),
-                                    contentPadding: const EdgeInsets.all(5),
-                                    value: getBeerMeta(beerId).favourite,
-                                    onChanged: (bool? value) {
-                                      _updateMeta(beerId, 'favourite',
-                                          !getBeerMeta(beerId).favourite);
-                                      // setState((){
-                                      //   beerMetaData[beerId].favourite = !beerMetaData[beerId].favourite;
-                                      // });
-                                    },
-                                  )
-                              )
-                            ],
+                                  child: LabelledCheckbox(
+                                      text: const Text("Tried", textScaleFactor: 1.1,),
+                                      padding: const EdgeInsets.only(left: 1),
+                                      value: getBeerMeta(beerId).tried,
+                                      onChanged: (bool? value) {
+                                        _updateMeta(beerId, 'tried',
+                                            !getBeerMeta(beerId).tried);
+                                      })
+                              ),
+                              Expanded(
+                                  flex: 2,
+                                  child: LabelledCheckbox(
+                                      text: const Text("Favourite", textScaleFactor: 1.1,),
+                                      padding: const EdgeInsets.only(left: 1),
+                                      value: getBeerMeta(beerId).favourite,
+                                      onChanged: (bool? value) {
+                                        _updateMeta(beerId, 'favourite',
+                                            !getBeerMeta(beerId).favourite);
+                                      })
+                              ),
+                            ]
                           ),
                           Visibility(
                               visible: getBeerMeta(beerId).tried,
