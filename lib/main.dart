@@ -433,7 +433,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                         Expanded(
                             flex: 1,
-                            child: Text(_getLabel(getBeerMeta(beerId)))
+                            child: _getLabelWidget(getBeerMeta(beerId))
                         ),
                       ]),
                   Visibility(
@@ -479,6 +479,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   child: LabelledCheckbox(
                                       text: const Text("Tried", textScaleFactor: 1.1,),
                                       padding: const EdgeInsets.only(left: 1),
+                                      activeColor: Colors.orange,
                                       value: getBeerMeta(beerId).tried,
                                       onChanged: (bool? value) {
                                         _updateMeta(beerId, 'tried',
@@ -491,6 +492,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       text: const Text("Favourite", textScaleFactor: 1.1,),
                                       padding: const EdgeInsets.only(left: 1),
                                       value: getBeerMeta(beerId).favourite,
+                                      activeColor: Colors.purple,
                                       onChanged: (bool? value) {
                                         _updateMeta(beerId, 'favourite',
                                             !getBeerMeta(beerId).favourite);
@@ -517,14 +519,42 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String _getLabel(BeerMeta beerMeta) {
-    if (beerMeta.favourite == true) {
+    if (beerMeta.favourite) {
       return 'Fave';
-    } else if (beerMeta.tried == true) {
+    } else if (beerMeta.tried) {
       return 'Tried';
-    } else if (beerMeta.want == true) {
+    } else if (beerMeta.want) {
       return 'Want';
     }
     return '';
+  }
+
+  MaterialColor _getColour(BeerMeta beerMeta){
+    if(beerMeta.favourite){
+      return Colors.purple;
+    }
+    if(beerMeta.tried){
+      return Colors.orange;
+    }
+    return Colors.blue;
+  }
+
+  Widget _getLabelWidget(BeerMeta beerMeta){
+    String label = _getLabel(beerMeta);
+    if(label == '') return const Text('');
+    Container container = Container(
+      margin: const EdgeInsets.only(right: 5),
+      padding: const EdgeInsets.only(left: 5),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+        border: Border.all(
+            width: 1,
+            color: _getColour(beerMeta)
+        ),
+      ),
+      child: Text(label)
+    );
+    return container;
   }
 
   List<Widget> _createRatingStars(BeerMeta beerMeta, beerId) {
@@ -561,9 +591,9 @@ class _MyHomePageState extends State<MyHomePage> {
       // },
       child: rating < threshold
       // ignore: prefer_const_constructors
-          ? Icon(color: Colors.yellow, Icons.star_outline_rounded)
+          ? Icon(color: Colors.orange, Icons.star_outline_rounded)
       // ignore: prefer_const_constructors
-          : Icon(color: Colors.yellow, Icons.star_rate_rounded),
+          : Icon(color: Colors.orange, Icons.star_rate_rounded),
     );
   }
 
