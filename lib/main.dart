@@ -10,6 +10,7 @@ import 'package:gbbf_beer_app/saved_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gbbf_beer_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'beer_lists.dart';
 import 'beer_meta.dart';
@@ -270,6 +271,21 @@ class _MyHomePageState extends State<MyHomePage> {
     //   beerMetaData = clone;
     // });
   }
+  Future<void> _openUrl(StaticBeer staticBeer) async {
+    String url = staticBeer.untappdUrl == '' ? _createUntappdSearchUrl(staticBeer) : staticBeer.untappdUrl;
+    debugPrint("_openUrl url=$url");
+    // if(url == ''){
+    //   debugPrint("_openUrl no url");
+    //   return;
+    // }
+    final parsedUrl = Uri.parse(url);
+    await launchUrl(parsedUrl, mode: LaunchMode.externalApplication);
+  }
+
+  String _createUntappdSearchUrl(StaticBeer staticBeer){
+    String query = Uri.encodeComponent("${staticBeer.brewery} ${staticBeer.name}");
+    return "https://untappd.com/search?q=$query&type=beer&sort=all";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -373,11 +389,6 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () =>
                   _updateMeta(
                       beerId, 'showDetail', !getBeerMeta(beerId).showDetail),
-              // onTap: (){
-              //   setState(() {
-              //     beerMetaData[beerId].showDetail = !beerMetaData[beerId].showDetail;
-              //   });
-              // },
               child: Column(
                 children: [
                   const Divider(height: 10,),
@@ -429,10 +440,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: [
                               Expanded(
                                   flex: 1,
-                                  child: Image.asset(
-                                      'assets/images/untappd-512.png',
-                                      height: 30,
-                                      width: 30
+                                  child: GestureDetector(
+                                    onTap: () => _openUrl(filteredBeers[i]),
+                                      child: Image.asset(
+                                        filteredBeers[i].untappdUrl == null || filteredBeers[i].untappdUrl == ''
+                                            ? 'assets/images/untappd-512-grey.png'
+                                            : 'assets/images/untappd-512.png',
+                                        height: 30,
+                                        width: 30
+                                      )
                                   )
                               ),
                               Expanded(
