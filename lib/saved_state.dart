@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'beer_meta.dart';
 
 class SavedState{
@@ -47,8 +49,14 @@ class SavedState{
       );
 
   Map toJson(){
+    debugPrint("SavedState toJson called");
     // List? beerMeta = beerMetaList.map((i) => i.toJson()).toList();
-    Map? beerMeta = beerMetaByFestival.map((k,v) => MapEntry(k, v.map((meta) => meta.toJson())));
+    Map<String, List<Map>> beerMeta = beerMetaByFestival.map((k,v) => MapEntry(k.toString(), v.map((meta) => meta.toJson()).toList()));
+    // debugPrint("SavedState toJson beerMeta=$beerMeta");
+    // beerMeta.forEach((key, value) {
+    //   debugPrint("key.runtimeType=${key.runtimeType} value.runtimeType==${value.runtimeType}");
+    //
+    // });
     return {
       "festivalName" : festivalName,
       "searchText": searchText,
@@ -70,12 +78,37 @@ class SavedState{
     };
   }
   factory SavedState.fromJson(dynamic json){
-    var beerMetaJsonAll = json['beerMeta'] as Map<String, List<String>>;
-    Map<String, List<BeerMeta>> beerMeta = beerMetaJsonAll.map(
-            (key, value) => MapEntry(key, value.map(
-                    (e) => BeerMeta.fromJson(e)).toList()
-            )
-    );
+    debugPrint("SavedState.fromJson starting");
+    // var beerMetaJsonAll = json['beerMeta'] as Map<String, List<String>>;
+    Map beerMetaJsonAll = json['beerMeta'];
+    // debugPrint("SavedState.fromJson beerMetaJsonAll=$beerMetaJsonAll");
+    // debugPrint("SavedState.fromJson beerMetaJsonAll.runtimeType=${beerMetaJsonAll.runtimeType}");
+    Map<String, dynamic> test= beerMetaJsonAll.cast();
+    // debugPrint("SavedState.fromJson after cast test=$test");
+    Map<String, List<BeerMeta>> output = {};
+    for(var key in test.keys){
+      List<BeerMeta> beerMeta = [];
+      // debugPrint("SavedState.fromJson key=$key");
+      for(var entry in test[key]){
+        // debugPrint("SavedState.fromJson entry=$entry");
+        beerMeta.add(BeerMeta.fromJson(entry));
+      }
+      output[key] = beerMeta;
+    }
+    // debugPrint("SavedState.fromJson output=$output");
+
+    // for (var element in test.values) {
+    //   debugPrint("value=${element.runtimeType}");
+    //   List<dynamic> list = element;
+    //   for(var a in list){
+    //     debugPrint("a.type==${a.runtimeType}");
+    //   }
+    // }
+    // Map<String, List<BeerMeta>> beerMeta = beerMetaJsonAll.map(
+    //         (key, value) => MapEntry(key.toString(), value.map(
+    //                 (e) => BeerMeta.fromJson(e)).toList()
+    //         )
+    // );
     // var beerMetaJsonAll = json['beerMeta'] as List;
     // List<BeerMeta> beerMeta = beerMetaJsonAll.map((beerMetaJson) => BeerMeta.fromJson(beerMetaJson)).toList();
     return SavedState(
@@ -95,7 +128,8 @@ class SavedState{
         json['onlyShowWants'] as bool,
         json['onlyShowFavourites'] as bool,
         json['onlyShowTried'] as bool,
-        beerMeta
+        output
+        // beerMeta
     );
   }
 }

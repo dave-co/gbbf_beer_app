@@ -62,6 +62,7 @@ class MyHomePage extends StatefulHookWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  bool stateInitialised = false;
   // List<StaticBeer> beers = [];
   var filteredBeers = [];
 
@@ -96,8 +97,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    debugPrint("initState");
     _initFestivals();
-    _loadSavedState();
+    debugPrint("initState _initFestivals complete");
+    _loadSavedState().then((_) {
+      _searchBeers();
+      }
+    );
+    debugPrint("initState _loadSavedState complete");
     //     .then((_) {
     //   debugPrint("initState");
     //   // beers = _loadStaticBeers(year);
@@ -161,6 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   List<BeerMeta> getFestivalBeerMetaData() {
+    if(!beerMetaData.containsKey(activeFestival.name)) return [];
     return beerMetaData[activeFestival.name]!;
   }
 
@@ -536,34 +544,39 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _saveState() async {
-    debugPrint("saving state");
-    // Map<String, List<BeerMeta>> metaToSave = {
-    //   for (var f in festivals) f.name: f.beerMeta ?? []
-    // };
-    // debugPrint("metaToSave=$metaToSave");
-    final prefs = await SharedPreferences.getInstance();
-    String festivalName = activeFestival.name;
-    String json = jsonEncode(SavedState(
-        festivalName
-        ,searchText
-        ,nameSearch
-        ,notesSearch
-        ,brewerySearch
-        ,barSearch
-        ,styleSearch
-        ,countrySearch
-        ,showHandpull
-        ,showKeyKeg
-        ,showBottles
-        ,abvMin
-        ,abvMax
-        ,onlyShowWants
-        ,onlyShowFavourites
-        ,onlyShowTried
-        ,beerMetaData
-        // ,metaToSave
-    ));
-    prefs.setString("state", json);
+    if(stateInitialised){
+      debugPrint("saving state");
+      // Map<String, List<BeerMeta>> metaToSave = {
+      //   for (var f in festivals) f.name: f.beerMeta ?? []
+      // };
+      // debugPrint("metaToSave=$metaToSave");
+      final prefs = await SharedPreferences.getInstance();
+      String festivalName = activeFestival.name;
+      String json = jsonEncode(SavedState(
+          festivalName
+          ,searchText
+          ,nameSearch
+          ,notesSearch
+          ,brewerySearch
+          ,barSearch
+          ,styleSearch
+          ,countrySearch
+          ,showHandpull
+          ,showKeyKeg
+          ,showBottles
+          ,abvMin
+          ,abvMax
+          ,onlyShowWants
+          ,onlyShowFavourites
+          ,onlyShowTried
+          ,beerMetaData
+          // ,metaToSave
+      ).toJson());
+      prefs.setString("state", json);
+
+    } else {
+      debugPrint("saveState - state not initialised");
+    }
   }
 
   // List<BeerMeta> _checkMetaData(){
@@ -624,14 +637,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future _loadSavedState() async {
     try {
+      debugPrint("_loadSavedState starting");
       final prefs = await SharedPreferences.getInstance();
+      debugPrint("_loadSavedState read from shared prefs");
       String json = prefs.getString("state") ?? '';
+      debugPrint("_loadSavedState read json");
       if (json.isNotEmpty) {
+        debugPrint("_loadSavedState about to convert json");
         SavedState savedState = SavedState.fromJson(jsonDecode(json));
         debugPrint("before festivalName");
         activeFestival = _getFestival(savedState.festivalName);
         // year = savedState.year;
-        debugPrint("activeFestival=$activeFestival before searchText");
+        debugPrint("activeFestival=$activeFestival");
+        debugPrint("before beerMetaList");
+        beerMetaData = _loadMetaData(savedState.beerMetaByFestival);
+        debugPrint("before searchText");
         searchText = savedState.searchText;
         debugPrint("before nameSearch");
         nameSearch = savedState.nameSearch;
@@ -661,16 +681,16 @@ class _MyHomePageState extends State<MyHomePage> {
         onlyShowFavourites = savedState.onlyShowFavourites;
         debugPrint("before onlyShowTried");
         onlyShowTried = savedState.onlyShowTried;
-        debugPrint("before beerMetaList");
-        beerMetaData = _loadMetaData(savedState.beerMetaByFestival);
         debugPrint("Saved state loaded");
+        stateInitialised = true;
         // debugMeta();
       } else {
         debugPrint("Saved state not found");
       }
-    } catch (e) {
+    } catch (e, s) {
       debugPrint("Error loading saved state");
       debugPrint(e.toString());
+      debugPrint(s.toString());
 
       const snackBar = SnackBar(content: Text("Error loading saved state"));
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -680,11 +700,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Map<String, List<BeerMeta>> _loadMetaData(Map<String, List<BeerMeta>> savedMeta){
     for(final festival in festivals){
       // first check that the key exists
+      debugPrint("festival.name=${festival.name}");
       savedMeta.putIfAbsent(festival.name, () => []);
       // null check
       savedMeta[festival.name] ??= [];
       // count the diff
       var metaCreateCount = festival.staticBeers.length - savedMeta[festival.name]!.length;
+      debugPrint("metaCreateCount=$metaCreateCount");
       if(metaCreateCount > 0){
         final extraMetas = List.generate(metaCreateCount, (index) {
           return BeerMeta(false);
