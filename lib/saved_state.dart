@@ -1,7 +1,8 @@
 import 'beer_meta.dart';
 
 class SavedState{
-  String year;
+  String festivalName;
+  // String year;
   String searchText;
 
   bool nameSearch;
@@ -22,10 +23,11 @@ class SavedState{
   bool onlyShowFavourites;
   bool onlyShowTried;
 
-  List<BeerMeta> beerMetaList;
+  Map<String, List<BeerMeta>> beerMetaByFestival;
+  // List<BeerMeta> beerMetaList;
 
   SavedState(
-      this.year,
+      this.festivalName,
       this.searchText,
       this.nameSearch,
       this.notesSearch,
@@ -41,13 +43,14 @@ class SavedState{
       this.onlyShowWants,
       this.onlyShowFavourites,
       this.onlyShowTried,
-      this.beerMetaList
+      this.beerMetaByFestival
       );
 
   Map toJson(){
-    List? beerMeta = beerMetaList.map((i) => i.toJson()).toList();
+    // List? beerMeta = beerMetaList.map((i) => i.toJson()).toList();
+    Map? beerMeta = beerMetaByFestival.map((k,v) => MapEntry(k, v.map((meta) => meta.toJson())));
     return {
-      "year" : year,
+      "festivalName" : festivalName,
       "searchText": searchText,
       "nameSearch": nameSearch,
       "notesSearch": notesSearch,
@@ -67,10 +70,16 @@ class SavedState{
     };
   }
   factory SavedState.fromJson(dynamic json){
-    var beerMetaJsonAll = json['beerMeta'] as List;
-    List<BeerMeta> beerMeta = beerMetaJsonAll.map((beerMetaJson) => BeerMeta.fromJson(beerMetaJson)).toList();
+    var beerMetaJsonAll = json['beerMeta'] as Map<String, List<String>>;
+    Map<String, List<BeerMeta>> beerMeta = beerMetaJsonAll.map(
+            (key, value) => MapEntry(key, value.map(
+                    (e) => BeerMeta.fromJson(e)).toList()
+            )
+    );
+    // var beerMetaJsonAll = json['beerMeta'] as List;
+    // List<BeerMeta> beerMeta = beerMetaJsonAll.map((beerMetaJson) => BeerMeta.fromJson(beerMetaJson)).toList();
     return SavedState(
-        json['year'] as String,
+        json['festivalName'] as String,
         json['searchText'] as String,
         json['nameSearch'] as bool,
         json['notesSearch'] as bool,

@@ -1,28 +1,34 @@
 import 'package:flutter/material.dart';
 
 class Settings extends StatefulWidget {
-  final String yearParam;
-  const Settings(this.yearParam, {Key? key}) : super(key: key);
+  // final String yearParam;
+  final String festivalName;
+  final List<String> festivalNames;
+  const Settings(this.festivalName, this.festivalNames, {Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _CreateSettingsState();
 }
 
 class _CreateSettingsState extends State<Settings> {
-  static const years = ['2023', '2022'];
-  late String year;
+  // static const years = ['2023', '2022'];
+  // late String year;
+  late String festivalName;
+  late List<String> festivalNames;
 
   @override
   void initState(){
     super.initState();
-    year = widget.yearParam;
+    // year = widget.yearParam;
+    festivalName = widget.festivalName;
+    festivalNames = widget.festivalNames;
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
-          Navigator.pop(context, year);
+          Navigator.pop(context, festivalName);
           return false;
         },
         child: Scaffold(
@@ -33,13 +39,13 @@ class _CreateSettingsState extends State<Settings> {
                     padding: EdgeInsets.only(right: 20, left: 20),
                     child: Text('Year:')),
                 DropdownButton(
-                    value: year,
-                    items: years.map((String year) {
-                      return DropdownMenuItem(value: year, child: Text(year));
+                    value: festivalName,
+                    items: festivalNames.map((String festivalName) {
+                      return DropdownMenuItem(value: festivalName, child: Text(festivalName));
                     }).toList(),
-                    onChanged: (String? newYear) {
+                    onChanged: (String? newFestivalName) {
                       setState(() {
-                        year = newYear!;
+                        festivalName = newFestivalName!;
                       });
                     })
               ])

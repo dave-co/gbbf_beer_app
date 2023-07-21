@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:gbbf_beer_app/beer.dart';
+import 'package:gbbf_beer_app/static_beer.dart';
 import 'package:gbbf_beer_app/search_data.dart';
 import 'package:gbbf_beer_app/settings.dart';
 import 'package:gbbf_beer_app/search.dart';
@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'beer_lists.dart';
 import 'beer_meta.dart';
+import 'festival.dart';
 
 void main() {
   runApp(const MyApp());
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulHookWidget {
-   const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -53,17 +54,23 @@ class MyHomePage extends StatefulHookWidget {
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
-   final String title;
-   @override
-   State<StatefulWidget> createState() => _MyHomePageState();
+  final String title;
+
+  @override
+  State<StatefulWidget> createState() => _MyHomePageState();
 }
+
 class _MyHomePageState extends State<MyHomePage> {
 
-  List<Beer> beers = [];
+  // List<StaticBeer> beers = [];
   var filteredBeers = [];
-  List<BeerMeta> beerMetaData = [];
 
-  String year = "2023";
+  // map of year to beer meta data
+  Map<String, List<BeerMeta>> beerMetaData = {};
+
+  // String year = "2023";
+  // String festivalName = '';
+  late Festival activeFestival;
   String searchText = '';
 
   bool nameSearch = true;
@@ -84,25 +91,53 @@ class _MyHomePageState extends State<MyHomePage> {
   bool onlyShowFavourites = false;
   bool onlyShowTried = false;
 
+  List<Festival> festivals = [];
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    _loadSavedState()
-        .then((_) {
-          beers = _loadStaticBeers(year);
-          beerMetaData = _createMetaData(beers);
-        });
+    _initFestivals();
+    _loadSavedState();
+    //     .then((_) {
+    //   debugPrint("initState");
+    //   // beers = _loadStaticBeers(year);
+    //   // beerMetaData[year] = _checkMetaData();
+    //   _createMetaData(beers);
+    // });
   }
 
-  void _settingsResult(newYear){
-    debugPrint("returned from settings");
+  void _initFestivals() {
+    festivals.add(Festival(
+      // "gbbf-2003",
+        "GBBF 2023",
+        List.generate(beers2023.length, (index) =>
+            StaticBeer.fromJson(jsonDecode(beers2023[index])))));
+    festivals.add(Festival(
+      // "gbbf-2002",
+        "GBBF 2022",
+        List.generate(beers2022.length, (index) =>
+            StaticBeer.fromJson(jsonDecode(beers2022[index])))));
+    // default festival is top one. This may be overridden by the saved state when it loads.
+    activeFestival = festivals[0];
+  }
+
+  Festival _getFestival(String festivalName) {
+    if (!festivals.any((element) => element.name == festivalName)) {
+      debugPrint("festivalName '$festivalName' not found, using default");
+      return festivals[0];
+    }
+    return festivals.firstWhere((element) => element.name == festivalName);
+  }
+
+  void _settingsResult(String newFestivalName) {
+    debugPrint("returned from settings with newFestivalName=$newFestivalName");
     setState(() {
-      year = newYear;
+      activeFestival = _getFestival(newFestivalName);
     });
   }
 
-  void _searchFieldsResult(SearchData searchData){
-    setState((){
+  void _searchFieldsResult(SearchData searchData) {
+    setState(() {
       searchText = searchData.searchText;
       nameSearch = searchData.nameSearch;
       notesSearch = searchData.notesSearch;
@@ -121,32 +156,78 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _searchBeers(){
+  BeerMeta getBeerMeta(int beerId){
+    return getFestivalBeerMetaData()[beerId];
+  }
+
+  List<BeerMeta> getFestivalBeerMetaData() {
+    return beerMetaData[activeFestival.name]!;
+  }
+
+  List<StaticBeer> getStaticBeersForFestival(){
+    return activeFestival.staticBeers;
+  }
+
+  void _searchBeers() {
     debugPrint("_searchBeers called");
-    setState((){
+    List<StaticBeer> beers = getStaticBeersForFestival();
+    List<BeerMeta> meta = getFestivalBeerMetaData();
+    //TODO maybe remove this?
+    if (beers.length < 2) {
+      return;
+    }
+    if (meta.length != beers.length) {
+      debugPrint("meta.length=${meta.length} beers.length=${beers.length} - search skipped");
+      return;
+    }
+    setState(() {
       filteredBeers = beers.where((beer) {
         // check abv first, if outside the range we don't care about the rest of the search options
-        if(beer.abv < abvMin || (abvMax != maxAbv && beer.abv > abvMax)){
+        if (beer.abv < abvMin || (abvMax != maxAbv && beer.abv > abvMax)) {
           return false;
         }
         // now check dispense method
-        if(beer.dispenseMethod == "Handpull" && !showHandpull || beer.dispenseMethod == "KeyKeg" && !showKeyKeg || beer.dispenseMethod == "Bottle" && !showBottles){
+        if (beer.dispenseMethod == "Handpull" && !showHandpull ||
+            beer.dispenseMethod == "KeyKeg" && !showKeyKeg ||
+            beer.dispenseMethod == "Bottle" && !showBottles) {
           return false;
         }
-        BeerMeta beerMeta = beerMetaData[beer.id];
-        if(onlyShowTried == true && !beerMeta.tried){return false;}
-        if(onlyShowWants == true && !beerMeta.want){return false;}
-        if(onlyShowFavourites == true && !beerMeta.favourite){return false;}
+        // List<BeerMeta>? list = beerMetaData[year];
+        // list![beer.id];
+        // BeerMeta beerMeta = beerMetaData[year]![beer.id];
+        BeerMeta beerMeta = meta[beer.id];
+        if (onlyShowTried == true && !beerMeta.tried) {
+          return false;
+        }
+        if (onlyShowWants == true && !beerMeta.want) {
+          return false;
+        }
+        if (onlyShowFavourites == true && !beerMeta.favourite) {
+          return false;
+        }
 
         String text = searchText.toLowerCase();
-        if(nameSearch    && beer.name.toLowerCase().contains(text)){return true;}
-        if(notesSearch   && beer.notes.toLowerCase().contains(text)){return true;}
-        if(brewerySearch && beer.brewery.toLowerCase().contains(text)){return true;}
-        if(barSearch     && beer.barCode.toLowerCase().contains(text)){return true;}
-        if(styleSearch   && beer.style.toLowerCase().contains(text)){return true;}
-        if(countrySearch && beer.country.toLowerCase().contains(text)){return true;}
+        if (nameSearch && beer.name.toLowerCase().contains(text)) {
+          return true;
+        }
+        if (notesSearch && beer.notes.toLowerCase().contains(text)) {
+          return true;
+        }
+        if (brewerySearch && beer.brewery.toLowerCase().contains(text)) {
+          return true;
+        }
+        if (barSearch && beer.barCode.toLowerCase().contains(text)) {
+          return true;
+        }
+        if (styleSearch && beer.style.toLowerCase().contains(text)) {
+          return true;
+        }
+        if (countrySearch && beer.country.toLowerCase().contains(text)) {
+          return true;
+        }
 
-        if(!nameSearch && !notesSearch && !brewerySearch && !barSearch && !styleSearch && !countrySearch){
+        if (!nameSearch && !notesSearch && !brewerySearch && !barSearch &&
+            !styleSearch && !countrySearch) {
           return true;
         }
         return false;
@@ -155,29 +236,69 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  // List<BeerMeta> _cloneMeta(){
+  //   return List<BeerMeta>.of(beerMetaData);
+  // }
+
+  void _updateMeta(int beerId, String propertyName, dynamic value) {
+    debugPrint("beerId=$beerId propertyName=$propertyName value=$value");
+    Map<String, List<BeerMeta>> clone = Map.of(beerMetaData);
+    BeerMeta beerMeta = clone[activeFestival.name]![beerId];
+    beerMeta.set(propertyName, value);
+    if(propertyName == 'tried' && value is bool && value){
+      beerMeta.want = false;
+    }
+    setState(() {
+      beerMetaData = clone;
+    });
+
+    // List<BeerMeta> clone = List<BeerMeta>.of(beerMetaData);
+    // clone[beerId].set(propertyName, value);
+    // if (propertyName == 'tried' && value is bool && value) {
+    //   clone[beerId].want = false;
+    // }
+    // setState(() {
+    //   beerMetaData = clone;
+    // });
+  }
+
   @override
   Widget build(BuildContext context) {
-
     useEffect(() {
       _saveState();
       _searchBeers();
-      return (){};
-    },[searchText, nameSearch, notesSearch, brewerySearch, barSearch,
+      return () {};
+    }, [searchText, nameSearch, notesSearch, brewerySearch, barSearch,
       styleSearch, countrySearch, showHandpull, showKeyKeg, showBottles,
       abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried]);
 
+    // useEffect(() {
+    //   beers = _loadStaticBeers(year);
+    //   _saveState();
+    //   _searchBeers();
+    //   return () {};
+    // }, [year]);
+
     useEffect(() {
-      beers = _loadStaticBeers(year);
       _saveState();
       _searchBeers();
-      return (){};
-    },[year]);
+      return () {};
+    }, [activeFestival]);
+
+    useEffect(() {
+      _saveState();
+      return () {};
+    }, [beerMetaData]);
+
+    // updateMeta(Function f){
+    //
+    // }
 
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text('Gbbf Beers $year'),
+        title: Text('${activeFestival.name} Beers'),
         actions: [
           Padding(
               padding: const EdgeInsets.only(right: 20),
@@ -186,23 +307,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Search(
-                                searchText,
-                                nameSearch,
-                                notesSearch,
-                                brewerySearch,
-                                barSearch,
-                                styleSearch,
-                                countrySearch,
-                                showHandpull,
-                                showKeyKeg,
-                                showBottles,
-                                abvMin,
-                                abvMax,
-                                onlyShowWants,
-                                onlyShowFavourites,
-                                onlyShowTried
-                            )
+                            builder: (context) =>
+                                Search(
+                                    searchText,
+                                    nameSearch,
+                                    notesSearch,
+                                    brewerySearch,
+                                    barSearch,
+                                    styleSearch,
+                                    countrySearch,
+                                    showHandpull,
+                                    showKeyKeg,
+                                    showBottles,
+                                    abvMin,
+                                    abvMax,
+                                    onlyShowWants,
+                                    onlyShowFavourites,
+                                    onlyShowTried
+                                )
                         )
                     ).then((value) => _searchFieldsResult(value));
                   },
@@ -219,7 +341,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => Settings(year)))
+                            builder: (context) => Settings(
+                                activeFestival.name,
+                                List.generate(festivals.length, (index) => festivals[index].name)
+                            )
+                        ))
                         .then((value) => _settingsResult(value));
                   },
                   child: const Icon(
@@ -232,123 +358,133 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView.builder(
           itemCount: filteredBeers.length,
-            itemBuilder: (BuildContext context, int i) {
+          itemBuilder: (BuildContext context, int i) {
             var beerId = filteredBeers[i].id;
-              return GestureDetector(
-                onTap: (){
-                  setState(() {
-                    beerMetaData[beerId].showDetail = !beerMetaData[beerId].showDetail;
-                  });
-                },
-                child: Column(
-                  children: [
-                    const Divider(height: 10,),
-                    Row(
+            return GestureDetector(
+              onTap: () =>
+                  _updateMeta(
+                      beerId, 'showDetail', !getBeerMeta(beerId).showDetail),
+              // onTap: (){
+              //   setState(() {
+              //     beerMetaData[beerId].showDetail = !beerMetaData[beerId].showDetail;
+              //   });
+              // },
+              child: Column(
+                children: [
+                  const Divider(height: 10,),
+                  Row(
+                    children: [
+                      Expanded(
+                          flex: 4,
+                          child: Text(filteredBeers[i].name)
+                      ),
+                      Expanded(
+                          flex: 2,
+                          child: Text('${filteredBeers[i].abv}%')
+                      ),
+                      Expanded(
+                          flex: 2,
+                          child: Text(filteredBeers[i].dispenseMethod)
+                      ),
+                    ],
+                  ),
+                  Row(
                       children: [
                         Expanded(
                             flex: 4,
-                            child: Text(filteredBeers[i].name)
+                            child: Text('  ${filteredBeers[i].brewery}')
                         ),
                         Expanded(
                             flex: 2,
-                            child: Text('${filteredBeers[i].abv}%')
+                            child: Text(filteredBeers[i].style)
                         ),
                         Expanded(
-                            flex: 2,
-                            child: Text(filteredBeers[i].dispenseMethod)
+                            flex: 1,
+                            child: Text(filteredBeers[i].barCode)
                         ),
-                      ],
-                    ),
-                    Row(
+                        Expanded(
+                            flex: 1,
+                            child: Text(_getLabel(getBeerMeta(beerId)))
+                        ),
+                      ]),
+                  Visibility(
+                      visible: getBeerMeta(beerId).showDetail,
+                      child: Column(
                         children: [
-                          Expanded(
-                              flex: 4,
-                              child: Text('  ${filteredBeers[i].brewery}')
+                          Row(
+                            children: [
+                              Expanded(child: Text(filteredBeers[i].notes))
+                            ],
                           ),
-                          Expanded(
-                              flex: 2,
-                              child: Text(filteredBeers[i].style)
+                          Row(
+                            children: [
+                              Expanded(
+                                  flex: 2,
+                                  child: CheckboxListTile(
+                                    title: const Text('Want'),
+                                    value: getBeerMeta(beerId).want,
+                                    onChanged: (bool? value) {
+                                      _updateMeta(beerId, 'want',
+                                          !getBeerMeta(beerId).want);
+                                      // setState((){
+                                      //   beerMetaData[beerId].want = !beerMetaData[beerId].want;
+                                      // });
+                                    },
+                                  )
+                              ),
+                              Expanded(
+                                  flex: 2,
+                                  child: CheckboxListTile(
+                                    title: const Text('Tried'),
+                                    value: getBeerMeta(beerId).tried,
+                                    onChanged: (bool? value) {
+                                      _updateMeta(beerId, 'tried',
+                                          !getBeerMeta(beerId).tried);
+                                      // setState((){
+                                      //   beerMetaData[beerId].tried = !beerMetaData[beerId].tried;
+                                      //   if(beerMetaData[beerId].tried == true && beerMetaData[beerId].want == true) {
+                                      //     beerMetaData[beerId].want = false;
+                                      //   }
+                                      // });
+                                    },
+                                  )
+                              ),
+                              Expanded(
+                                  flex: 2,
+                                  child: CheckboxListTile(
+                                    title: const Text('Favourite'),
+                                    contentPadding: const EdgeInsets.all(5),
+                                    value: getBeerMeta(beerId).favourite,
+                                    onChanged: (bool? value) {
+                                      _updateMeta(beerId, 'favourite',
+                                          !getBeerMeta(beerId).favourite);
+                                      // setState((){
+                                      //   beerMetaData[beerId].favourite = !beerMetaData[beerId].favourite;
+                                      // });
+                                    },
+                                  )
+                              )
+                            ],
                           ),
-                          Expanded(
-                              flex: 1,
-                              child: Text(filteredBeers[i].barCode)
-                          ),
-                          Expanded(
-                              flex: 1,
-                              child: Text(_getLabel(beerMetaData[beerId]))
-                          ),
-                        ]),
-                    Visibility(
-                      visible: beerMetaData[beerId].showDetail,
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(child: Text(filteredBeers[i].notes))
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                    flex: 2,
-                                    child: CheckboxListTile(
-                                      title: const Text('Want'),
-                                      value: beerMetaData[beerId].want,
-                                      onChanged: (bool? value){
-                                        setState((){
-                                          beerMetaData[beerId].want = !beerMetaData[beerId].want;
-                                        });
-                                      },
-                                    )
-                                ),
-                                Expanded(
-                                    flex: 2,
-                                    child: CheckboxListTile(
-                                      title: const Text('Tried'),
-                                      value: beerMetaData[beerId].tried,
-                                      onChanged: (bool? value){
-                                        setState((){
-                                          beerMetaData[beerId].tried = !beerMetaData[beerId].tried;
-                                          if(beerMetaData[beerId].tried == true && beerMetaData[beerId].want == true) {
-                                            beerMetaData[beerId].want = false;
-                                          }
-                                        });
-                                      },
-                                    )
-                                ),
-                                Expanded(
-                                    flex: 2,
-                                    child: CheckboxListTile(
-                                      title: const Text('Favourite'),
-                                      contentPadding: const EdgeInsets.all(5),
-                                      value: beerMetaData[beerId].favourite,
-                                      onChanged: (bool? value){
-                                        setState((){
-                                          beerMetaData[beerId].favourite = !beerMetaData[beerId].favourite;
-                                        });
-                                      },
-                                    )
-                                )
-                              ],
-                            ),
-                            Visibility(
-                                visible: beerMetaData[beerId].tried,
-                                child: Row(
-                                    children: _createRatingStars(beerMetaData[beerId], beerId)
-                                )
-                            )
-                          ],
-                        )
-                    )
-                  ],
-                ),
-              );
-            })
+                          Visibility(
+                              visible: getBeerMeta(beerId).tried,
+                              child: Row(
+                                  children: _createRatingStars(
+                                      getBeerMeta(beerId), beerId)
+                              )
+                          )
+                        ],
+                      )
+                  )
+                ],
+              ),
+            );
+          })
       , // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  String _getLabel(BeerMeta beerMeta){
+  String _getLabel(BeerMeta beerMeta) {
     if (beerMeta.favourite == true) {
       return 'Fave';
     } else if (beerMeta.tried == true) {
@@ -363,12 +499,13 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Widget> stars = [
       Expanded(flex: 2, child: beerMeta.rating == 0
           ? const Text('Rating: ')
-          :  GestureDetector(
-        onTap: (){
-          setState(() {
-            beerMetaData[beerId].rating = 0;
-          });
-        },
+          : GestureDetector(
+        onTap: () => _updateMeta(beerId, 'rating', 0),
+        //   onTap: (){
+        //   setState(() {
+        //     beerMetaData[beerId].rating = 0;
+        //   });
+        // },
         child: const Text('Clear'),
       )
       ),
@@ -384,11 +521,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   GestureDetector _createStar(int threshold, int rating, int beerId) {
     return GestureDetector(
-      onTap: (){
-        setState(() {
-          beerMetaData[beerId].rating = threshold;
-        });
-      },
+      onTap: () => _updateMeta(beerId, 'rating', threshold),
+      // onTap: (){
+      //   setState(() {
+      //     beerMetaData[beerId].rating = threshold;
+      //   });
+      // },
       child: rating < threshold
       // ignore: prefer_const_constructors
           ? Icon(color: Colors.yellow, Icons.star_outline_rounded)
@@ -399,8 +537,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _saveState() async {
     debugPrint("saving state");
+    // Map<String, List<BeerMeta>> metaToSave = {
+    //   for (var f in festivals) f.name: f.beerMeta ?? []
+    // };
+    // debugPrint("metaToSave=$metaToSave");
     final prefs = await SharedPreferences.getInstance();
-    String json = jsonEncode(SavedState(year
+    String festivalName = activeFestival.name;
+    String json = jsonEncode(SavedState(
+        festivalName
         ,searchText
         ,nameSearch
         ,notesSearch
@@ -417,45 +561,77 @@ class _MyHomePageState extends State<MyHomePage> {
         ,onlyShowFavourites
         ,onlyShowTried
         ,beerMetaData
+        // ,metaToSave
     ));
     prefs.setString("state", json);
   }
 
-  List<BeerMeta> _createMetaData(List<Beer> beers) {
-    final m = List.generate(beers.length, (index) {
-      // TODO may need to change when loading saved metadata
-      return BeerMeta(false);
-    });
-    return m;
+  // List<BeerMeta> _checkMetaData(){
+  //   List<BeerMeta>? metaList = beerMetaData[year];
+  //   metaList ??= []; //if list is null initialise
+  //   debugPrint("_checkMetaData metaList.length=${metaList.length} beers.length=${beers.length}");
+  //   if(beers.length > metaList.length){
+  //     var metaCreateCount = beers.length - metaList.length;
+  //     final metas = List.generate(metaCreateCount, (index) {
+  //       return BeerMeta(false);
+  //     });
+  //     List<BeerMeta> clone = List<BeerMeta>.of(metaList);
+  //     clone.addAll(metas);
+  //     return clone;
+  //   }
+  //   if(metaList.length > beers.length){
+  //     throw Exception("metadata is longer than beers, wtf. year=$year metaList.length=${metaList.length} beers.length=${beers.length}");
+  //   }
+  //   return metaList;
+  // }
+
+  // void _createMetaData(List<StaticBeer> beers) {
+  //   debugPrint("_createMetaData beerMetaData.length=${beerMetaData
+  //       .length} beers.length=${beers.length}");
+  //   if (beerMetaData.length < beers.length) {
+  //     var metaCreateCount = beers.length - beerMetaData.length;
+  //     final metas = List.generate(metaCreateCount, (index) {
+  //       return BeerMeta(false);
+  //     });
+  //     List<BeerMeta> clone = List<BeerMeta>.of(beerMetaData);
+  //     clone.addAll(metas);
+  //     beerMetaData = clone;
+  //   }
+    // final m = List.generate(beers.length, (index) {
+    //   // TODO may need to change when loading saved metadata
+    //   return BeerMeta(false);
+    // });
+    // return m;
     // setState(() {
     // });
-  }
+  // }
 
 
-  List<Beer> _loadStaticBeers(String yearToLoad) {
-    var sourceList = [];
-    if(yearToLoad == "2023"){
-      sourceList = beers2023;
-    } else if (yearToLoad == "2022"){
-      sourceList = beers2022;
-    }
-    final staticBeers = List.generate(sourceList.length, (index) {
-      var beer = Beer.fromJson(jsonDecode(sourceList[index]));
-      return beer;
-    });
-    debugPrint("_loadStaticBeers found ${staticBeers.length} beers");
-    return staticBeers;
-  }
+  // List<StaticBeer> _loadStaticBeers(String yearToLoad) {
+  //   var sourceList = [];
+  //   if (yearToLoad == "2023") {
+  //     sourceList = beers2023;
+  //   } else if (yearToLoad == "2022") {
+  //     sourceList = beers2022;
+  //   }
+  //   final staticBeers = List.generate(sourceList.length, (index) {
+  //     var beer = StaticBeer.fromJson(jsonDecode(sourceList[index]));
+  //     return beer;
+  //   });
+  //   debugPrint("_loadStaticBeers found ${staticBeers.length} beers");
+  //   return staticBeers;
+  // }
 
   Future _loadSavedState() async {
-    try{
+    try {
       final prefs = await SharedPreferences.getInstance();
       String json = prefs.getString("state") ?? '';
-      if(json.isNotEmpty){
+      if (json.isNotEmpty) {
         SavedState savedState = SavedState.fromJson(jsonDecode(json));
-        debugPrint("before year");
-        year = savedState.year;
-        debugPrint("before searchText");
+        debugPrint("before festivalName");
+        activeFestival = _getFestival(savedState.festivalName);
+        // year = savedState.year;
+        debugPrint("activeFestival=$activeFestival before searchText");
         searchText = savedState.searchText;
         debugPrint("before nameSearch");
         nameSearch = savedState.nameSearch;
@@ -486,12 +662,13 @@ class _MyHomePageState extends State<MyHomePage> {
         debugPrint("before onlyShowTried");
         onlyShowTried = savedState.onlyShowTried;
         debugPrint("before beerMetaList");
-        beerMetaData = savedState.beerMetaList;
+        beerMetaData = _loadMetaData(savedState.beerMetaByFestival);
         debugPrint("Saved state loaded");
+        // debugMeta();
       } else {
         debugPrint("Saved state not found");
       }
-    } catch(e){
+    } catch (e) {
       debugPrint("Error loading saved state");
       debugPrint(e.toString());
 
@@ -499,4 +676,39 @@ class _MyHomePageState extends State<MyHomePage> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
+
+  Map<String, List<BeerMeta>> _loadMetaData(Map<String, List<BeerMeta>> savedMeta){
+    for(final festival in festivals){
+      // first check that the key exists
+      savedMeta.putIfAbsent(festival.name, () => []);
+      // null check
+      savedMeta[festival.name] ??= [];
+      // count the diff
+      var metaCreateCount = festival.staticBeers.length - savedMeta[festival.name]!.length;
+      if(metaCreateCount > 0){
+        final extraMetas = List.generate(metaCreateCount, (index) {
+          return BeerMeta(false);
+        });
+        savedMeta[festival.name]!.addAll(extraMetas);
+      }
+    }
+    return savedMeta;
+  }
+
+  // debugMeta() {
+  //   debugPrint("beerMetaData.length=${beerMetaData.length}");
+  //   var triedIds = [];
+  //   var ratingIds = [];
+  //   for (var i = 0; i < beerMetaData.length; i++) {
+  //     var element = beerMetaData[i];
+  //     if (element.tried) {
+  //       triedIds.add(i);
+  //     }
+  //     if (element.rating > 0) {
+  //       ratingIds.add(i);
+  //     }
+  //   }
+  //   debugPrint("triedIds=$triedIds");
+  //   debugPrint("ratingIds=$ratingIds");
+  // }
 }

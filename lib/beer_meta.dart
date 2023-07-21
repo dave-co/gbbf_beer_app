@@ -9,6 +9,25 @@ class BeerMeta {
 
   BeerMeta.all(this.showDetail, this.want, this.tried, this.favourite, this.rating);
 
+  void set(String propertyName, dynamic value){
+    switch(propertyName) {
+      case 'showDetail':
+        showDetail = value;
+        break;
+      case 'want':
+        want = value;
+        break;
+      case 'tried':
+        tried = value;
+        break;
+      case 'favourite':
+        favourite = value;
+        break;
+      case 'rating':
+        rating = value;
+    }
+  }
+
   Map toJson() => {
     "showDetail" : showDetail,
     "want" : want,
