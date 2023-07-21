@@ -396,7 +396,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       Expanded(
                           flex: 4,
-                          child: Text(filteredBeers[i].name)
+                          child: Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child:Text(filteredBeers[i].name))
                       ),
                       Expanded(
                           flex: 2,
@@ -412,7 +414,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Expanded(
                             flex: 4,
-                            child: Text('  ${filteredBeers[i].brewery}')
+                            child: Padding(
+                                padding: const EdgeInsets.only(left: 14),
+                                child: Text('${filteredBeers[i].brewery}')
+                            )
                         ),
                         Expanded(
                             flex: 2,
@@ -431,10 +436,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       visible: getBeerMeta(beerId).showDetail,
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(child: Text(filteredBeers[i].notes))
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(left: 5),
+                            child: Row(
+                              children: [
+                                Expanded(child: Text(filteredBeers[i].notes))
+                              ],
+                            )
                           ),
                           Row(
                             children: [
