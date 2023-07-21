@@ -37,7 +37,7 @@ class _CreateSettingsState extends State<Settings> {
               Row(children: [
                 const Padding(
                     padding: EdgeInsets.only(right: 20, left: 20),
-                    child: Text('Year:')),
+                    child: Text('Festival:')),
                 DropdownButton(
                     value: festivalName,
                     items: festivalNames.map((String festivalName) {

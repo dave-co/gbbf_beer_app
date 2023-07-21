@@ -326,6 +326,10 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text('${activeFestival.name} Beers'),
         actions: [
           Padding(
+              padding: const EdgeInsets.only(top: 17, right: 20),
+              child:Text("${filteredBeers.length}", textScaleFactor: 1.3)
+          ),
+          Padding(
               padding: const EdgeInsets.only(right: 20),
               child: GestureDetector(
                   onTap: () {
