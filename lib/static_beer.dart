@@ -21,7 +21,7 @@ class StaticBeer {
         json['barCode'] as String,
         json['notes'] as String,
         json['brewery'] as String,
-        json['country'] as String,
+        json['country'] == null ? '' : json['country'] as String,
         json['untappdUrl'] == null ? '' : json['untappdUrl'] as String,
         json['dispenseMethod'] == null ? 'unknown' : json['dispenseMethod'] as String);
   }

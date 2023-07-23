@@ -192,13 +192,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     setState(() {
       filteredBeers = beers.where((beer) {
+        if(beer.name == "null") return false;
         // check abv first, if outside the range we don't care about the rest of the search options
         if (beer.abv < abvMin || (abvMax != maxAbv && beer.abv > abvMax)) {
           return false;
         }
         // now check dispense method
-        if (beer.dispenseMethod == "Handpull" && !showHandpull ||
-            beer.dispenseMethod == "KeyKeg" && !showKeyKeg ||
+        if ((beer.dispenseMethod == "Handpull" || beer.dispenseMethod == "Cask") && !showHandpull ||
+            (beer.dispenseMethod == "KeyKeg" || beer.dispenseMethod == "Keg") && !showKeyKeg ||
             beer.dispenseMethod == "Bottle" && !showBottles) {
           return false;
         }
@@ -750,6 +751,8 @@ class _MyHomePageState extends State<MyHomePage> {
         // debugMeta();
       } else {
         debugPrint("Saved state not found");
+        beerMetaData = _metaFirstLoad();
+        stateInitialised = true;
       }
     } catch (e, s) {
       debugPrint("Error loading saved state");
@@ -779,6 +782,18 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
     return savedMeta;
+  }
+
+  Map<String, List<BeerMeta>> _metaFirstLoad() {
+    Map<String, List<BeerMeta>> metaData = {};
+    for(final festival in festivals){
+      metaData.putIfAbsent(festival.name, () => []);
+      final newMeta = List.generate(festival.staticBeers.length, (index) {
+        return BeerMeta(false);
+      });
+      metaData[festival.name]!.addAll(newMeta);
+    }
+    return metaData;
   }
 
   // debugMeta() {
