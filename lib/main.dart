@@ -64,6 +64,7 @@ class MyHomePage extends StatefulHookWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  static const String SPECIALITY_PREFIX = "Speciality - ";
   bool stateInitialised = false;
   // List<StaticBeer> beers = [];
   List<StaticBeer> filteredBeers = [];
@@ -514,7 +515,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             );
-          }) : ListView.builder(          itemCount: filteredBeers.length,
+          }) : ListView.builder(
+          itemCount: filteredBeers.length,
           itemBuilder: (BuildContext context, int i) {
             var beerId = filteredBeers[i].id;
             return GestureDetector(
@@ -540,16 +542,17 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: [
                           Row(
                             children: [
-                            Expanded(
-                              flex: 8,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child:Text(filteredBeers[i].name, textScaleFactor: 1.5)
+                              Expanded(
+                                flex: 7,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child:Text(filteredBeers[i].name, textScaleFactor: 1.5)
+                                )
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: _getLabelWidget(getBeerMeta(beerId))
                               )
-                            ),
-                            const Expanded(
-                              flex: 1,
-                              child: Text("test", textScaleFactor: 1.1))
                             ],
                           ),
                           Row(
@@ -557,33 +560,33 @@ class _MyHomePageState extends State<MyHomePage> {
                               Expanded(
                                   flex: 4,
                                   child: Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child:Text(filteredBeers[i].brewery, textScaleFactor: 1.1,)
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child:Text(filteredBeers[i].brewery, textScaleFactor: 1.1,)
                                   )
                               ),
                               Expanded(
-                                  flex: 4,
-                                  child: Text(_parseStyle(filteredBeers[i]), textScaleFactor: 1.1,)
+                                flex: 4,
+                                child: Text(_parseStyle(filteredBeers[i]), textScaleFactor: 1.1,)
                               ),
                               Expanded(
-                                  flex: 1,
-                                  child: Text('${filteredBeers[i].abv}%', textScaleFactor: 1.1,)
+                                flex: 1,
+                                child: Text('${filteredBeers[i].abv}%', textScaleFactor: 1.1,)
                               ),
                             ],
                           ),
                           Row(
                             children: [
                               const Expanded(
-                                  flex: 4,
-                                  child: Text("")
+                                flex: 4,
+                                child: Text("")
                               ),
                               Expanded(
-                                  flex: 4,
-                                  child: Text(filteredBeers[i].dispenseMethod, textScaleFactor: 1.1,)
+                                flex: 4,
+                                child: _parseDispenseMethod(filteredBeers[i])
                               ),
                               Expanded(
-                                  flex: 1,
-                                  child: Text(filteredBeers[i].barCode, textScaleFactor: 1.1,)
+                                flex: 1,
+                                child: Text(filteredBeers[i].barCode, textScaleFactor: 1.1,)
                               )
                             ],
                           )
@@ -591,6 +594,75 @@ class _MyHomePageState extends State<MyHomePage> {
                       )
                     )
                   ],),
+                  Visibility(
+                    visible: getBeerMeta(beerId).showDetail,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child:
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10, right: 5),
+                                child: Text(filteredBeers[i].notes, textScaleFactor: 1.1),
+                              ),
+                            )
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: GestureDetector(
+                                onTap: () => _openUrl(filteredBeers[i]),
+                                child: Image.asset(
+                                  filteredBeers[i].untappdUrl == null || filteredBeers[i].untappdUrl == ''
+                                      ? 'assets/images/untappd-512-grey.png'
+                                      : 'assets/images/untappd-512.png',
+                                  height: 30,
+                                  width: 30
+                                )
+                              )
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: LabelledCheckbox(
+                                text: const Text("Want", textScaleFactor: 1.1,),
+                                padding: const EdgeInsets.only(left: 1),
+                                value: getBeerMeta(beerId).want,
+                                onChanged: (bool? value) {
+                                  _updateMeta(beerId, 'want',
+                                      !getBeerMeta(beerId).want);
+                                })
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: LabelledCheckbox(
+                                text: const Text("Tried", textScaleFactor: 1.1,),
+                                padding: const EdgeInsets.only(left: 1),
+                                activeColor: Colors.orange,
+                                value: getBeerMeta(beerId).tried,
+                                onChanged: (bool? value) {
+                                  _updateMeta(beerId, 'tried',
+                                      !getBeerMeta(beerId).tried);
+                                })
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: LabelledCheckbox(
+                                text: const Text("Favourite", textScaleFactor: 1.1,),
+                                padding: const EdgeInsets.only(left: 1),
+                                value: getBeerMeta(beerId).favourite,
+                                activeColor: Colors.purple,
+                                onChanged: (bool? value) {
+                                  _updateMeta(beerId, 'favourite',
+                                      !getBeerMeta(beerId).favourite);
+                                })
+                            ),
+                          ],
+                        ),
+                      ]
+                    )
+                  )
                 ]
               ),
             );
@@ -603,7 +675,20 @@ class _MyHomePageState extends State<MyHomePage> {
     if(staticBeer.style == 'null'){
       return staticBeer.styleImage;
     }
+    if(staticBeer.style.startsWith(SPECIALITY_PREFIX)){
+      return staticBeer.style.substring(SPECIALITY_PREFIX.length);
+    }
     return staticBeer.style;
+  }
+
+  Text _parseDispenseMethod(StaticBeer staticBeer){
+    if(staticBeer.dispenseMethod == "null"){
+      return Text("Unknown",
+        textScaleFactor: 1.1,
+        style: TextStyle(color: Colors.black.withOpacity(0.4)),
+      );
+    }
+    return Text(staticBeer.dispenseMethod, textScaleFactor: 1.1);
   }
 
   Color _parseColour(String colourHex){
@@ -648,11 +733,11 @@ class _MyHomePageState extends State<MyHomePage> {
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(5)),
         border: Border.all(
-            width: 1,
+            width: 2,
             color: _getColour(beerMeta)
         ),
       ),
-      child: Text(label)
+      child: Text(label, textAlign: TextAlign.center)
     );
     return container;
   }

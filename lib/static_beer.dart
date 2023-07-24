@@ -13,10 +13,12 @@ class StaticBeer {
   String dispenseMethod;
   String colour;
   String styleImage;
+  String barName;
+  String barLocation;
 
   StaticBeer(this.id, this.name, this.abv, this.style, this.barCode, this.notes,
       this.brewery, this.country, this.untappdUrl, this.dispenseMethod,
-      this.colour, this.styleImage);
+      this.colour, this.styleImage, this.barName, this.barLocation);
 
   factory StaticBeer.fromJson(dynamic json) {
     return StaticBeer(json['id'] as int,
@@ -30,7 +32,9 @@ class StaticBeer {
         json['untappdUrl'] == null ? '' : json['untappdUrl'] as String,
         json['dispenseMethod'] == null ? 'unknown' : json['dispenseMethod'] as String,
         json['colour'] == null ? '' : json['colour'] as String,
-        json['styleImage'] == null ? '' : json['styleImage'] as String
+        json['styleImage'] == null ? '' : json['styleImage'] as String,
+        json['barName'] == null ? '' : json['barName'] as String,
+        json['barLocation'] == null ? '' : json['barLocation'] as String
     );
   }
 }
