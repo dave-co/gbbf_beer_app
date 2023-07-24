@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool stateInitialised = false;
   // List<StaticBeer> beers = [];
-  var filteredBeers = [];
+  List<StaticBeer> filteredBeers = [];
 
   // map of year to beer meta data
   Map<String, List<BeerMeta>> beerMetaData = {};
@@ -386,7 +386,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: ListView.builder(
+      body: activeFestival.name == 'GBBF 2022' ? ListView.builder(
           itemCount: filteredBeers.length,
           itemBuilder: (BuildContext context, int i) {
             var beerId = filteredBeers[i].id;
@@ -514,9 +514,102 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             );
+          }) : ListView.builder(          itemCount: filteredBeers.length,
+          itemBuilder: (BuildContext context, int i) {
+            var beerId = filteredBeers[i].id;
+            return GestureDetector(
+              onTap:  () =>
+                  _updateMeta(
+                      beerId, 'showDetail', !getBeerMeta(beerId).showDetail),
+              child: Column(
+                children: [
+                  const Divider(height: 10,),
+                  Row(
+                    children:
+                    [
+                      Expanded(
+                        flex: 9,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 5),
+                          child:Text(filteredBeers[i].name, textScaleFactor: 1.5)
+                        )
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: CircleAvatar(
+                          backgroundColor: _parseColour(filteredBeers[i].colour),
+                          maxRadius: 10,
+                        )
+                        // child: Container(
+                        //   decoration: BoxDecoration(
+                        //     shape: BoxShape.circle,
+                        //     color: _parseColour(filteredBeers[i].colour)
+                        //   ),
+                        //   child: Text("a"),
+                        // )
+                      )
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 5),
+                          child:Text(filteredBeers[i].brewery, textScaleFactor: 1.1,)
+                        )
+                      ),
+                      Expanded(
+                          flex: 4,
+                          child: Text(_parseStyle(filteredBeers[i]), textScaleFactor: 1.1,)
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text('${filteredBeers[i].abv}%', textScaleFactor: 1.1,)
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      const Expanded(
+                        flex: 5,
+                        child: Text("")
+                      ),
+                      Expanded(
+                        flex: 4,
+                        child: Text(filteredBeers[i].dispenseMethod, textScaleFactor: 1.1,)
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Text(filteredBeers[i].barCode, textScaleFactor: 1.1,)
+                      )
+                    ],
+                  )
+                ]
+              ),
+            );
           })
       , // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  String _parseStyle(StaticBeer staticBeer){
+    if(staticBeer.style == 'null'){
+      return staticBeer.styleImage;
+    }
+    return staticBeer.style;
+  }
+
+  Color _parseColour(String colourHex){
+    if(colourHex.contains("#")){
+      if(colourHex == "#c2c2c2"){
+        return Colors.white;
+      }
+      Color color = Color(int.parse(colourHex.replaceAll("#", "0xFF")));
+      return color;
+    } else {
+      return Colors.white;
+    }
   }
 
   String _getLabel(BeerMeta beerMeta) {
