@@ -618,8 +618,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   filteredBeers[i].untappdUrl == null || filteredBeers[i].untappdUrl == ''
                                       ? 'assets/images/untappd-512-grey.png'
                                       : 'assets/images/untappd-512.png',
-                                  height: 30,
-                                  width: 30
+                                  height: 38,
+                                  width: 38
                                 )
                               )
                             ),
@@ -660,6 +660,13 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                           ],
                         ),
+                        Visibility(
+                            visible: getBeerMeta(beerId).tried,
+                            child: Row(
+                                children: _createRatingStars(
+                                    getBeerMeta(beerId), beerId)
+                            )
+                        )
                       ]
                     )
                   )

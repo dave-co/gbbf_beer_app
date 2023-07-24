@@ -15,12 +15,16 @@ class StaticBeer {
   String styleImage;
   String barName;
   String barLocation;
+  List<String> tags;
 
   StaticBeer(this.id, this.name, this.abv, this.style, this.barCode, this.notes,
       this.brewery, this.country, this.untappdUrl, this.dispenseMethod,
-      this.colour, this.styleImage, this.barName, this.barLocation);
+      this.colour, this.styleImage, this.barName, this.barLocation, this.tags);
 
   factory StaticBeer.fromJson(dynamic json) {
+    // debugPrint("json['id']=${json['id']}");
+    List<dynamic> tagListDynamic = json['tags'] ?? [];
+    List<String> tagListString = tagListDynamic.map((e) => e.toString()).toList();
     return StaticBeer(json['id'] as int,
         json['name'] as String,
         double.parse(json['abv'] as String),
@@ -34,7 +38,8 @@ class StaticBeer {
         json['colour'] == null ? '' : json['colour'] as String,
         json['styleImage'] == null ? '' : json['styleImage'] as String,
         json['barName'] == null ? '' : json['barName'] as String,
-        json['barLocation'] == null ? '' : json['barLocation'] as String
+        json['barLocation'] == null ? '' : json['barLocation'] as String,
+        tagListString
     );
   }
 }
