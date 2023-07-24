@@ -524,67 +524,73 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 children: [
                   const Divider(height: 10,),
-                  Row(
-                    children:
-                    [
-                      Expanded(
-                        flex: 9,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child:Text(filteredBeers[i].name, textScaleFactor: 1.5)
-                        )
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: CircleAvatar(
+                  Row(children: [
+                    Expanded(
+                      flex: 1,
+                      child: Column(children: [
+                        CircleAvatar(
                           backgroundColor: _parseColour(filteredBeers[i].colour),
-                          maxRadius: 10,
+                          maxRadius: 16,
                         )
-                        // child: Container(
-                        //   decoration: BoxDecoration(
-                        //     shape: BoxShape.circle,
-                        //     color: _parseColour(filteredBeers[i].colour)
-                        //   ),
-                        //   child: Text("a"),
-                        // )
+                      ],)
+                    ),
+                    Expanded(
+                      flex: 9,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                            Expanded(
+                              flex: 8,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child:Text(filteredBeers[i].name, textScaleFactor: 1.5)
+                              )
+                            ),
+                            const Expanded(
+                              flex: 1,
+                              child: Text("test", textScaleFactor: 1.1))
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                  flex: 4,
+                                  child: Padding(
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child:Text(filteredBeers[i].brewery, textScaleFactor: 1.1,)
+                                  )
+                              ),
+                              Expanded(
+                                  flex: 4,
+                                  child: Text(_parseStyle(filteredBeers[i]), textScaleFactor: 1.1,)
+                              ),
+                              Expanded(
+                                  flex: 1,
+                                  child: Text('${filteredBeers[i].abv}%', textScaleFactor: 1.1,)
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              const Expanded(
+                                  flex: 4,
+                                  child: Text("")
+                              ),
+                              Expanded(
+                                  flex: 4,
+                                  child: Text(filteredBeers[i].dispenseMethod, textScaleFactor: 1.1,)
+                              ),
+                              Expanded(
+                                  flex: 1,
+                                  child: Text(filteredBeers[i].barCode, textScaleFactor: 1.1,)
+                              )
+                            ],
+                          )
+                        ],
                       )
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child:Text(filteredBeers[i].brewery, textScaleFactor: 1.1,)
-                        )
-                      ),
-                      Expanded(
-                          flex: 4,
-                          child: Text(_parseStyle(filteredBeers[i]), textScaleFactor: 1.1,)
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text('${filteredBeers[i].abv}%', textScaleFactor: 1.1,)
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      const Expanded(
-                        flex: 5,
-                        child: Text("")
-                      ),
-                      Expanded(
-                        flex: 4,
-                        child: Text(filteredBeers[i].dispenseMethod, textScaleFactor: 1.1,)
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Text(filteredBeers[i].barCode, textScaleFactor: 1.1,)
-                      )
-                    ],
-                  )
+                    )
+                  ],),
                 ]
               ),
             );
