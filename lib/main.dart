@@ -201,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // now check dispense method
         if ((beer.dispenseMethod == "Handpull" || beer.dispenseMethod == "Cask") && !showHandpull ||
             (beer.dispenseMethod == "KeyKeg" || beer.dispenseMethod == "Keg") && !showKeyKeg ||
-            beer.dispenseMethod == "Bottle" && !showBottles) {
+            (beer.dispenseMethod == "Bottle" || beer.dispenseMethod == "Can") && !showBottles) {
           return false;
         }
         // List<BeerMeta>? list = beerMetaData[year];
@@ -608,6 +608,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             )
                           ],
                         ),
+                        // Row(children: _createTags(filteredBeers[i]),),
+                        Wrap(
+                          spacing: 2,
+                          alignment: WrapAlignment.center,
+                          children: _createTags(filteredBeers[i]),),
                         Row(
                           children: [
                             Expanded(
@@ -676,6 +681,50 @@ class _MyHomePageState extends State<MyHomePage> {
           })
       , // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  List<Widget> _createTags(StaticBeer staticBeer){
+    List<Widget> tags = [];
+    for(String tagText in staticBeer.tags){
+      tags.add(Padding(
+          padding: const EdgeInsets.only(left: 5),
+          child: Chip(
+            label:Text(tagText),
+            elevation: 3,
+            backgroundColor: _getColor(tagText),
+            // shape: const StadiumBorder(side: BorderSide()),
+          )
+      ));
+    }
+    return tags;
+  }
+
+  Color _getColor(String tag){
+    if(tag == 'Citrus') return Colors.lime;
+    if(tag == 'Hoppy') return Colors.lightGreen;
+    if(tag == 'Pine') return Colors.yellow.shade100;
+    if(tag == 'Pale') return Colors.yellowAccent.shade100;
+    if(tag == 'Pale Ale') return Colors.yellowAccent.shade100;
+    if(tag == 'Golden') return Colors.yellow;
+    if(tag == 'Lemon') return Colors.yellow.shade600;
+    if(tag == 'Tangerine') return Colors.orangeAccent;
+    if(tag == 'Orange') return Colors.orange;
+    if(tag == 'Floral') return Colors.pink.shade100;
+    if(tag == 'Grapefruit') return Colors.pinkAccent.shade100;
+    if(tag == 'Fruity') return Colors.purpleAccent;
+    if(tag == 'Ipa') return Colors.purple;
+    if(tag == 'Sweet') return Colors.red.shade500;
+    if(tag == 'Malty') return Colors.red.shade900;
+    if(tag == 'Caramel') return Colors.brown.shade300;
+    if(tag == 'Chocolate') return Colors.brown.shade400;
+    if(tag == 'Chocolate') return Colors.brown;
+    if(tag == 'Coffee') return Colors.brown.shade700;
+    if(tag == 'Dark') return Colors.brown.shade800;
+    if(tag == 'Tropical') return Colors.lightBlue;
+    if(tag == 'Light') return Colors.grey.shade200;
+    if(tag == 'Vanilla') return Colors.grey.shade300;
+
+    return Colors.black12;
   }
 
   String _parseStyle(StaticBeer staticBeer){
