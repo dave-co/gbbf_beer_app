@@ -11,6 +11,7 @@ class Search extends StatefulWidget {
   final bool barSearchParam;
   final bool styleSearchParam;
   final bool countrySearchParam;
+  final bool tagSearchParam;
 
   final bool showHandpullParam;
   final bool showKeyKegParam;
@@ -22,6 +23,7 @@ class Search extends StatefulWidget {
   final bool onlyShowWantsParam;
   final bool onlyShowFavouritesParam;
   final bool onlyShowTriedParam;
+  final String activeFestivalNameParam;
 
   const Search(
       this.searchTextParam,
@@ -31,6 +33,7 @@ class Search extends StatefulWidget {
       this.barSearchParam,
       this.styleSearchParam,
       this.countrySearchParam,
+      this.tagSearchParam,
       this.showHandpullParam,
       this.showKeyKegParam,
       this.showBottlesParam,
@@ -39,6 +42,7 @@ class Search extends StatefulWidget {
       this.onlyShowWantsParam,
       this.onlyShowFavouritesParam,
       this.onlyShowTriedParam,
+      this.activeFestivalNameParam,
       {Key? key})
       : super(key: key);
 
@@ -56,6 +60,7 @@ class _CreateSearchState extends State<Search> {
   late bool barSearch;
   late bool styleSearch;
   late bool countrySearch;
+  late bool tagSearch;
 
   late bool showHandpull;
   late bool showKeyKeg;
@@ -70,6 +75,7 @@ class _CreateSearchState extends State<Search> {
   late bool onlyShowWants;
   late bool onlyShowFavourites;
   late bool onlyShowTried;
+  late String activeFestivalName;
 
   @override
   void initState() {
@@ -81,6 +87,7 @@ class _CreateSearchState extends State<Search> {
     barSearch = widget.barSearchParam;
     styleSearch = widget.styleSearchParam;
     countrySearch = widget.countrySearchParam;
+    tagSearch = widget.tagSearchParam;
     showHandpull = widget.showHandpullParam;
     showKeyKeg = widget.showKeyKegParam;
     showBottles = widget.showBottlesParam;
@@ -91,6 +98,7 @@ class _CreateSearchState extends State<Search> {
     onlyShowWants = widget.onlyShowWantsParam;
     onlyShowFavourites = widget.onlyShowFavouritesParam;
     onlyShowTried = widget.onlyShowTriedParam;
+    activeFestivalName = widget.activeFestivalNameParam;
   }
 
   @override
@@ -107,6 +115,7 @@ class _CreateSearchState extends State<Search> {
               barSearch,
               styleSearch,
               countrySearch,
+              tagSearch,
               showHandpull,
               showKeyKeg,
               showBottles,
@@ -114,7 +123,9 @@ class _CreateSearchState extends State<Search> {
               abvRange.end,
               onlyShowWants,
               onlyShowFavourites,
-              onlyShowTried));
+              onlyShowTried,
+              activeFestivalName,
+          ));
       return false;
     }
 
@@ -252,7 +263,7 @@ class _CreateSearchState extends State<Search> {
                                             });
                                           })
                                   ),
-                                  Expanded(
+                                  activeFestivalName == 'GBBF 2022' ? Expanded(
                                       flex: 2,
                                       child: LabelledCheckbox(
                                           text: const Text('Country', textScaleFactor: 1.1,),
@@ -261,6 +272,17 @@ class _CreateSearchState extends State<Search> {
                                           onChanged: (bool? value){
                                             setState((){
                                               countrySearch = !countrySearch;
+                                            });
+                                          })
+                                  ) : Expanded(
+                                      flex: 2,
+                                      child: LabelledCheckbox(
+                                          text: const Text('Tag', textScaleFactor: 1.1,),
+                                          padding: const EdgeInsets.only(left: 1),
+                                          value: tagSearch,
+                                          onChanged: (bool? value){
+                                            setState((){
+                                              tagSearch = !tagSearch;
                                             });
                                           })
                                   ),

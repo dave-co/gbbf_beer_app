@@ -83,6 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool barSearch = true;
   bool styleSearch = false;
   bool countrySearch = false;
+  bool tagSearch = true;
 
   bool showHandpull = true;
   bool showKeyKeg = true;
@@ -155,6 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
       barSearch = searchData.barSearch;
       styleSearch = searchData.styleSearch;
       countrySearch = searchData.countrySearch;
+      tagSearch = searchData.tagSearch;
       showHandpull = searchData.showHandpull;
       showKeyKeg = searchData.showKeyKeg;
       showBottles = searchData.showBottles;
@@ -234,12 +236,17 @@ class _MyHomePageState extends State<MyHomePage> {
         if (styleSearch && beer.style.toLowerCase().contains(text)) {
           return true;
         }
-        if (countrySearch && beer.country.toLowerCase().contains(text)) {
+        if ("GBBF 2022" == activeFestival.name && countrySearch && beer.country.toLowerCase().contains(text)) {
+          return true;
+        }
+        if ("GBBF 2023" == activeFestival.name && tagSearch && beer.tags.any((tag) => tag.toLowerCase().contains(text))) {
           return true;
         }
 
-        if (!nameSearch && !notesSearch && !brewerySearch && !barSearch &&
-            !styleSearch && !countrySearch) {
+        if (!nameSearch && !notesSearch && !brewerySearch && !barSearch && !styleSearch &&
+            (("GBBF 2022" == activeFestival.name && !countrySearch)
+                  || ("GBBF 2023" == activeFestival.name && !tagSearch))
+          ) {
           return true;
         }
         return false;
@@ -347,6 +354,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     barSearch,
                                     styleSearch,
                                     countrySearch,
+                                    tagSearch,
                                     showHandpull,
                                     showKeyKeg,
                                     showBottles,
@@ -354,7 +362,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     abvMax,
                                     onlyShowWants,
                                     onlyShowFavourites,
-                                    onlyShowTried
+                                    onlyShowTried,
+                                    activeFestival.name
                                 )
                         )
                     ).then((value) => _searchFieldsResult(value));
@@ -603,7 +612,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Expanded(child:
                               Padding(
                                 padding: const EdgeInsets.only(left: 10, right: 5),
-                                child: Text(filteredBeers[i].notes, textScaleFactor: 1.1),
+                                child: Text(_cleanNotesText(filteredBeers[i].notes), textScaleFactor: 1.1),
                               ),
                             )
                           ],
@@ -701,20 +710,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Color _getColor(String tag){
     if(tag == 'Citrus') return Colors.lime;
+    if(tag == 'Session') return Colors.lightGreen.shade300;
     if(tag == 'Hoppy') return Colors.lightGreen;
     if(tag == 'Pine') return Colors.yellow.shade100;
     if(tag == 'Pale') return Colors.yellowAccent.shade100;
     if(tag == 'Pale Ale') return Colors.yellowAccent.shade100;
+    if(tag == 'Blonde') return Colors.yellow.shade300;
     if(tag == 'Golden') return Colors.yellow;
     if(tag == 'Lemon') return Colors.yellow.shade600;
     if(tag == 'Tangerine') return Colors.orangeAccent;
     if(tag == 'Orange') return Colors.orange;
+    if(tag == 'Amber') return Colors.amber;
     if(tag == 'Floral') return Colors.pink.shade100;
     if(tag == 'Grapefruit') return Colors.pinkAccent.shade100;
+    if(tag == 'Refreshing') return Colors.purple.shade100;
+    if(tag == 'Bitter') return Colors.deepPurple.shade100;
     if(tag == 'Fruity') return Colors.purpleAccent;
-    if(tag == 'Ipa') return Colors.purple;
+    if(tag == 'Fruit') return Colors.purpleAccent;
+    if(tag == 'IPA') return Colors.purple;
     if(tag == 'Sweet') return Colors.red.shade500;
+    if(tag == 'Red') return Colors.red;
     if(tag == 'Malty') return Colors.red.shade900;
+    if(tag == 'Biscuit') return Colors.brown.shade200;
     if(tag == 'Caramel') return Colors.brown.shade300;
     if(tag == 'Chocolate') return Colors.brown.shade400;
     if(tag == 'Chocolate') return Colors.brown;
@@ -1034,6 +1051,10 @@ class _MyHomePageState extends State<MyHomePage> {
       metaData[festival.name]!.addAll(newMeta);
     }
     return metaData;
+  }
+
+  String _cleanNotesText(String notes) {
+    return notes.replaceAll("&amp;", "&");
   }
 
   // debugMeta() {

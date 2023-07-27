@@ -7,6 +7,7 @@ class SearchData {
   bool barSearch;
   bool styleSearch;
   bool countrySearch;
+  bool tagSearch;
 
   bool showHandpull;
   bool showKeyKeg;
@@ -18,6 +19,7 @@ class SearchData {
   bool onlyShowWants;
   bool onlyShowFavourites;
   bool onlyShowTried;
+  String activeFestivalName;
 
   SearchData(this.searchText,
       this.nameSearch,
@@ -26,6 +28,7 @@ class SearchData {
       this.barSearch,
       this.styleSearch,
       this.countrySearch,
+      this.tagSearch,
       this.showHandpull,
       this.showKeyKeg,
       this.showBottles,
@@ -33,6 +36,7 @@ class SearchData {
       this.abvMax,
       this.onlyShowWants,
       this.onlyShowFavourites,
-      this.onlyShowTried
+      this.onlyShowTried,
+      this.activeFestivalName
       );
 }
