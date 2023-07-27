@@ -8,6 +8,7 @@ import 'package:gbbf_beer_app/settings.dart';
 import 'package:gbbf_beer_app/search.dart';
 import 'package:gbbf_beer_app/saved_state.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gbbf_beer_app/tag_colours.dart';
 import 'package:gbbf_beer_app/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -72,8 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
   // map of year to beer meta data
   Map<String, List<BeerMeta>> beerMetaData = {};
 
-  // String year = "2023";
-  // String festivalName = '';
   late Festival activeFestival;
   String searchText = '';
 
@@ -109,12 +108,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     );
     debugPrint("initState _loadSavedState complete");
-    //     .then((_) {
-    //   debugPrint("initState");
-    //   // beers = _loadStaticBeers(year);
-    //   // beerMetaData[year] = _checkMetaData();
-    //   _createMetaData(beers);
-    // });
   }
 
   void _initFestivals() {
@@ -206,9 +199,6 @@ class _MyHomePageState extends State<MyHomePage> {
             (beer.dispenseMethod == "Bottle" || beer.dispenseMethod == "Can") && !showBottles) {
           return false;
         }
-        // List<BeerMeta>? list = beerMetaData[year];
-        // list![beer.id];
-        // BeerMeta beerMeta = beerMetaData[year]![beer.id];
         BeerMeta beerMeta = meta[beer.id];
         if (onlyShowTried == true && !beerMeta.tried) {
           return false;
@@ -255,10 +245,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // List<BeerMeta> _cloneMeta(){
-  //   return List<BeerMeta>.of(beerMetaData);
-  // }
-
   void _updateMeta(int beerId, String propertyName, dynamic value) {
     debugPrint("beerId=$beerId propertyName=$propertyName value=$value");
     Map<String, List<BeerMeta>> clone = Map.of(beerMetaData);
@@ -270,23 +256,10 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       beerMetaData = clone;
     });
-
-    // List<BeerMeta> clone = List<BeerMeta>.of(beerMetaData);
-    // clone[beerId].set(propertyName, value);
-    // if (propertyName == 'tried' && value is bool && value) {
-    //   clone[beerId].want = false;
-    // }
-    // setState(() {
-    //   beerMetaData = clone;
-    // });
   }
   Future<void> _openUrl(StaticBeer staticBeer) async {
     String url = staticBeer.untappdUrl == '' ? _createUntappdSearchUrl(staticBeer) : staticBeer.untappdUrl;
     debugPrint("_openUrl url=$url");
-    // if(url == ''){
-    //   debugPrint("_openUrl no url");
-    //   return;
-    // }
     final parsedUrl = Uri.parse(url);
     await launchUrl(parsedUrl, mode: LaunchMode.externalApplication);
   }
@@ -303,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _searchBeers();
       return () {};
     }, [searchText, nameSearch, notesSearch, brewerySearch, barSearch,
-      styleSearch, countrySearch, showHandpull, showKeyKeg, showBottles,
+      styleSearch, countrySearch, tagSearch, showHandpull, showKeyKeg, showBottles,
       abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried]);
 
     // useEffect(() {
@@ -695,53 +668,69 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> _createTags(StaticBeer staticBeer){
     List<Widget> tags = [];
     for(String tagText in staticBeer.tags){
+      TagColours tagColours = _getColors(tagText);
       tags.add(Padding(
           padding: const EdgeInsets.only(left: 5),
           child: Chip(
-            label:Text(tagText),
+            label:Text(tagText,style: TextStyle(color: tagColours.textColor),),
             elevation: 3,
-            backgroundColor: _getColor(tagText),
+            backgroundColor: tagColours.backgroundColor,
             // shape: const StadiumBorder(side: BorderSide()),
           )
       ));
     }
     return tags;
   }
-
-  Color _getColor(String tag){
-    if(tag == 'Citrus') return Colors.lime;
-    if(tag == 'Session') return Colors.lightGreen.shade300;
-    if(tag == 'Hoppy') return Colors.lightGreen;
-    if(tag == 'Pine') return Colors.yellow.shade100;
-    if(tag == 'Pale') return Colors.yellowAccent.shade100;
-    if(tag == 'Pale Ale') return Colors.yellowAccent.shade100;
-    if(tag == 'Blonde') return Colors.yellow.shade300;
-    if(tag == 'Golden') return Colors.yellow;
-    if(tag == 'Lemon') return Colors.yellow.shade600;
-    if(tag == 'Tangerine') return Colors.orangeAccent;
-    if(tag == 'Orange') return Colors.orange;
-    if(tag == 'Amber') return Colors.amber;
-    if(tag == 'Floral') return Colors.pink.shade100;
-    if(tag == 'Grapefruit') return Colors.pinkAccent.shade100;
-    if(tag == 'Refreshing') return Colors.purple.shade100;
-    if(tag == 'Bitter') return Colors.deepPurple.shade100;
-    if(tag == 'Fruity') return Colors.purpleAccent;
-    if(tag == 'Fruit') return Colors.purpleAccent;
-    if(tag == 'IPA') return Colors.purple;
-    if(tag == 'Sweet') return Colors.red.shade500;
-    if(tag == 'Red') return Colors.red;
-    if(tag == 'Malty') return Colors.red.shade900;
-    if(tag == 'Biscuit') return Colors.brown.shade200;
-    if(tag == 'Caramel') return Colors.brown.shade300;
-    if(tag == 'Chocolate') return Colors.brown.shade400;
-    if(tag == 'Chocolate') return Colors.brown;
-    if(tag == 'Coffee') return Colors.brown.shade700;
-    if(tag == 'Dark') return Colors.brown.shade800;
-    if(tag == 'Tropical') return Colors.lightBlue;
-    if(tag == 'Light') return Colors.grey.shade200;
-    if(tag == 'Vanilla') return Colors.grey.shade300;
-
-    return Colors.black12;
+  TagColours _getColors(String tag){
+    Color altText = Colors.white;
+    if(tag == 'Classic') return TagColours(Colors.teal, textColor: altText);
+    if(tag == 'Citrus') return TagColours(Colors.lime);
+    if(tag == 'Session') return TagColours(Colors.lightGreen.shade300);
+    if(tag == 'Hoppy') return TagColours(Colors.lightGreen);
+    if(tag == 'Citra') return TagColours(Colors.lightGreen.shade700, textColor: altText);
+    if(tag == 'Mosaic') return TagColours(Colors.lightGreen.shade800, textColor: altText);
+    if(tag == 'Cascade') return TagColours(Colors.lightGreen.shade900, textColor: altText);
+    if(tag == 'Pine') return TagColours(Colors.yellow.shade100);
+    if(tag == 'Pale') return TagColours(Colors.yellowAccent.shade100);
+    if(tag == 'Pale Ale') return TagColours(Colors.yellowAccent.shade100);
+    if(tag == 'Blonde') return TagColours(Colors.yellow.shade300);
+    if(tag == 'Lager') return TagColours(Colors.yellow.shade400);
+    if(tag == 'Golden') return TagColours(Colors.yellow);
+    if(tag == 'Lemon') return TagColours(Colors.yellow.shade600);
+    if(tag == 'Honey') return TagColours(Colors.yellow.shade900, textColor: altText);
+    if(tag == 'Tangerine') return TagColours(Colors.orangeAccent);
+    if(tag == 'Orange') return TagColours(Colors.orange, textColor: altText);
+    if(tag == 'Amber') return TagColours(Colors.amber);
+    if(tag == 'Floral') return TagColours(Colors.pink.shade100);
+    if(tag == 'Grapefruit') return TagColours(Colors.pinkAccent.shade100);
+    if(tag == 'Refreshing') return TagColours(Colors.purple.shade100);
+    if(tag == 'Bitter') return TagColours(Colors.deepPurple.shade100);
+    if(tag == 'Bitter Finish') return TagColours(Colors.deepPurple.shade300, textColor: altText);
+    if(tag == 'Smooth') return TagColours(Colors.deepPurple.shade500, textColor: altText);
+    if(tag == 'Fruity') return TagColours(Colors.purpleAccent, textColor: altText);
+    if(tag == 'Fruit') return TagColours(Colors.purpleAccent, textColor: altText);
+    if(tag == 'Dry') return TagColours(Colors.purple.shade300, textColor: altText);
+    if(tag == 'IPA') return TagColours(Colors.purple, textColor: altText);
+    if(tag == 'Rich') return TagColours(Colors.indigo.shade300, textColor: altText);
+    if(tag == 'Sour') return TagColours(Colors.red.shade300, textColor: altText);
+    if(tag == 'Sweet') return TagColours(Colors.red.shade500, textColor: altText);
+    if(tag == 'Red') return TagColours(Colors.red, textColor: altText);
+    if(tag == 'Malty') return TagColours(Colors.red.shade900, textColor: altText);
+    if(tag == 'Creamy') return TagColours(Colors.brown.shade50);
+    if(tag == 'Biscuit') return TagColours(Colors.brown.shade200);
+    if(tag == 'Caramel') return TagColours(Colors.brown.shade300, textColor: altText);
+    if(tag == 'Chocolate') return TagColours(Colors.brown.shade400, textColor: altText);
+    if(tag == 'Stout') return TagColours(Colors.brown, textColor: altText);
+    if(tag == 'Brown') return TagColours(Colors.brown.shade600, textColor: altText);
+    if(tag == 'Coffee') return TagColours(Colors.brown.shade700, textColor: altText);
+    if(tag == 'Dark') return TagColours(Colors.brown.shade800, textColor: altText);
+    if(tag == 'Tropical') return TagColours(Colors.lightBlue);
+    if(tag == 'Strong') return TagColours(Colors.lightBlue.shade900, textColor: altText);
+    if(tag == 'Light') return TagColours(Colors.grey.shade200);
+    if(tag == 'Vanilla') return TagColours(Colors.grey.shade300);
+    if(tag == 'Porter') return TagColours(Colors.grey.shade800, textColor: altText);
+    if(tag == 'Liquorice') return TagColours(Colors.grey.shade900, textColor: altText);
+    return TagColours(Colors.black12);
   }
 
   String _parseStyle(StaticBeer staticBeer){
@@ -852,11 +841,6 @@ class _MyHomePageState extends State<MyHomePage> {
   GestureDetector _createStar(int threshold, int rating, int beerId) {
     return GestureDetector(
       onTap: () => _updateMeta(beerId, 'rating', threshold),
-      // onTap: (){
-      //   setState(() {
-      //     beerMetaData[beerId].rating = threshold;
-      //   });
-      // },
       child: rating < threshold
       // ignore: prefer_const_constructors
           ? Icon(color: Colors.orange, Icons.star_outline_rounded)
@@ -900,62 +884,6 @@ class _MyHomePageState extends State<MyHomePage> {
       debugPrint("saveState - state not initialised");
     }
   }
-
-  // List<BeerMeta> _checkMetaData(){
-  //   List<BeerMeta>? metaList = beerMetaData[year];
-  //   metaList ??= []; //if list is null initialise
-  //   debugPrint("_checkMetaData metaList.length=${metaList.length} beers.length=${beers.length}");
-  //   if(beers.length > metaList.length){
-  //     var metaCreateCount = beers.length - metaList.length;
-  //     final metas = List.generate(metaCreateCount, (index) {
-  //       return BeerMeta(false);
-  //     });
-  //     List<BeerMeta> clone = List<BeerMeta>.of(metaList);
-  //     clone.addAll(metas);
-  //     return clone;
-  //   }
-  //   if(metaList.length > beers.length){
-  //     throw Exception("metadata is longer than beers, wtf. year=$year metaList.length=${metaList.length} beers.length=${beers.length}");
-  //   }
-  //   return metaList;
-  // }
-
-  // void _createMetaData(List<StaticBeer> beers) {
-  //   debugPrint("_createMetaData beerMetaData.length=${beerMetaData
-  //       .length} beers.length=${beers.length}");
-  //   if (beerMetaData.length < beers.length) {
-  //     var metaCreateCount = beers.length - beerMetaData.length;
-  //     final metas = List.generate(metaCreateCount, (index) {
-  //       return BeerMeta(false);
-  //     });
-  //     List<BeerMeta> clone = List<BeerMeta>.of(beerMetaData);
-  //     clone.addAll(metas);
-  //     beerMetaData = clone;
-  //   }
-    // final m = List.generate(beers.length, (index) {
-    //   // TODO may need to change when loading saved metadata
-    //   return BeerMeta(false);
-    // });
-    // return m;
-    // setState(() {
-    // });
-  // }
-
-
-  // List<StaticBeer> _loadStaticBeers(String yearToLoad) {
-  //   var sourceList = [];
-  //   if (yearToLoad == "2023") {
-  //     sourceList = beers2023;
-  //   } else if (yearToLoad == "2022") {
-  //     sourceList = beers2022;
-  //   }
-  //   final staticBeers = List.generate(sourceList.length, (index) {
-  //     var beer = StaticBeer.fromJson(jsonDecode(sourceList[index]));
-  //     return beer;
-  //   });
-  //   debugPrint("_loadStaticBeers found ${staticBeers.length} beers");
-  //   return staticBeers;
-  // }
 
   Future _loadSavedState() async {
     try {
@@ -1056,21 +984,4 @@ class _MyHomePageState extends State<MyHomePage> {
   String _cleanNotesText(String notes) {
     return notes.replaceAll("&amp;", "&");
   }
-
-  // debugMeta() {
-  //   debugPrint("beerMetaData.length=${beerMetaData.length}");
-  //   var triedIds = [];
-  //   var ratingIds = [];
-  //   for (var i = 0; i < beerMetaData.length; i++) {
-  //     var element = beerMetaData[i];
-  //     if (element.tried) {
-  //       triedIds.add(i);
-  //     }
-  //     if (element.rating > 0) {
-  //       ratingIds.add(i);
-  //     }
-  //   }
-  //   debugPrint("triedIds=$triedIds");
-  //   debugPrint("ratingIds=$ratingIds");
-  // }
 }
