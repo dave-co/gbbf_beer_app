@@ -24,6 +24,8 @@ class Search extends StatefulWidget {
   final bool onlyShowFavouritesParam;
   final bool onlyShowTriedParam;
   final String activeFestivalNameParam;
+  final bool onlyShowGlutenFreeParam;
+  final bool onlyShowVeganParam;
 
   const Search(
       this.searchTextParam,
@@ -43,6 +45,8 @@ class Search extends StatefulWidget {
       this.onlyShowFavouritesParam,
       this.onlyShowTriedParam,
       this.activeFestivalNameParam,
+      this.onlyShowGlutenFreeParam,
+      this.onlyShowVeganParam,
       {Key? key})
       : super(key: key);
 
@@ -76,6 +80,8 @@ class _CreateSearchState extends State<Search> {
   late bool onlyShowFavourites;
   late bool onlyShowTried;
   late String activeFestivalName;
+  late bool onlyShowGlutenFree;
+  late bool onlyShowVegan;
 
   @override
   void initState() {
@@ -99,6 +105,8 @@ class _CreateSearchState extends State<Search> {
     onlyShowFavourites = widget.onlyShowFavouritesParam;
     onlyShowTried = widget.onlyShowTriedParam;
     activeFestivalName = widget.activeFestivalNameParam;
+    onlyShowGlutenFree = widget.onlyShowGlutenFreeParam;
+    onlyShowVegan = widget.onlyShowVeganParam;
   }
 
   @override
@@ -125,6 +133,8 @@ class _CreateSearchState extends State<Search> {
               onlyShowFavourites,
               onlyShowTried,
               activeFestivalName,
+              onlyShowGlutenFree,
+              onlyShowVegan
           ));
       return false;
     }
@@ -436,6 +446,37 @@ class _CreateSearchState extends State<Search> {
                                               onlyShowFavourites = !onlyShowFavourites;
                                             });
                                           })
+                                  ),
+                                ],
+                              ),Row(
+                                children: [
+                                  Expanded(
+                                      flex: 2,
+                                      child: LabelledCheckbox(
+                                          text: const Text('Gluten Free', textScaleFactor: 1.1,),
+                                          padding: const EdgeInsets.only(left: 1),
+                                          value: onlyShowGlutenFree,
+                                          onChanged: (bool? value){
+                                            setState((){
+                                              onlyShowGlutenFree = !onlyShowGlutenFree;
+                                            });
+                                          })
+                                  ),
+                                  Expanded(
+                                      flex: 2,
+                                      child: LabelledCheckbox(
+                                          text: const Text('Vegan', textScaleFactor: 1.1,),
+                                          padding: const EdgeInsets.only(left: 1),
+                                          value: onlyShowVegan,
+                                          onChanged: (bool? value){
+                                            setState((){
+                                              onlyShowVegan = !onlyShowVegan;
+                                            });
+                                          })
+                                  ),
+                                  const Expanded(
+                                      flex: 2,
+                                      child: Text("")
                                   ),
                                 ],
                               ),

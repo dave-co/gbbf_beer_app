@@ -96,6 +96,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool onlyShowWants = false;
   bool onlyShowFavourites = false;
   bool onlyShowTried = false;
+  bool onlyShowGlutenFree = false;
+  bool onlyShowVegan = false;
 
   List<Festival> festivals = [];
 
@@ -160,6 +162,8 @@ class _MyHomePageState extends State<MyHomePage> {
       onlyShowWants = searchData.onlyShowWants;
       onlyShowFavourites = searchData.onlyShowFavourites;
       onlyShowTried = searchData.onlyShowTried;
+      onlyShowGlutenFree = searchData.onlyShowGlutenFree;
+      onlyShowVegan = searchData.onlyShowVegan;
     });
   }
 
@@ -209,6 +213,12 @@ class _MyHomePageState extends State<MyHomePage> {
           return false;
         }
         if (onlyShowFavourites == true && !beerMeta.favourite) {
+          return false;
+        }
+        if (onlyShowGlutenFree == true && !beer.glutenFree) {
+          return false;
+        }
+        if (onlyShowVegan == true && !beer.vegan) {
           return false;
         }
 
@@ -279,7 +289,9 @@ class _MyHomePageState extends State<MyHomePage> {
       return () {};
     }, [searchText, nameSearch, notesSearch, brewerySearch, barSearch,
       styleSearch, countrySearch, tagSearch, showHandpull, showKeyKeg, showBottles,
-      abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried]);
+      abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried,
+      onlyShowGlutenFree, onlyShowVegan
+    ]);
 
     // useEffect(() {
     //   beers = _loadStaticBeers(year);
@@ -338,7 +350,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                     onlyShowWants,
                                     onlyShowFavourites,
                                     onlyShowTried,
-                                    activeFestival.name
+                                    activeFestival.name,
+                                    onlyShowGlutenFree,
+                                    onlyShowVegan
                                 )
                         )
                     ).then((value) => _searchFieldsResult(value));
@@ -734,6 +748,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if(tag == 'Red') return TagColours(Colors.red, textColor: altText);
     if(tag == 'Malty') return TagColours(Colors.red.shade900, textColor: altText);
     if(tag == 'Creamy') return TagColours(Colors.brown.shade50);
+    if(tag == 'Vanilla') return TagColours(Colors.brown.shade100);
     if(tag == 'Biscuit') return TagColours(Colors.brown.shade200);
     if(tag == 'Caramel') return TagColours(Colors.brown.shade300, textColor: altText);
     if(tag == 'Chocolate') return TagColours(Colors.brown.shade400, textColor: altText);
@@ -744,7 +759,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if(tag == 'Tropical') return TagColours(Colors.lightBlue);
     if(tag == 'Strong') return TagColours(Colors.lightBlue.shade900, textColor: altText);
     if(tag == 'Light') return TagColours(Colors.grey.shade200);
-    if(tag == 'Vanilla') return TagColours(Colors.grey.shade300);
     if(tag == 'Porter') return TagColours(Colors.grey.shade800, textColor: altText);
     if(tag == 'Liquorice') return TagColours(Colors.grey.shade900, textColor: altText);
     return TagColours(Colors.black12);
@@ -884,6 +898,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ,barSearch
           ,styleSearch
           ,countrySearch
+          ,tagSearch
           ,showHandpull
           ,showKeyKeg
           ,showBottles
@@ -893,7 +908,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ,onlyShowFavourites
           ,onlyShowTried
           ,beerMetaData
-          // ,metaToSave
+          ,onlyShowGlutenFree
+          ,onlyShowVegan
       ).toJson());
       prefs.setString("state", json);
 

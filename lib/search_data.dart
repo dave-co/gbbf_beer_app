@@ -20,6 +20,8 @@ class SearchData {
   bool onlyShowFavourites;
   bool onlyShowTried;
   String activeFestivalName;
+  bool onlyShowGlutenFree;
+  bool onlyShowVegan;
 
   SearchData(this.searchText,
       this.nameSearch,
@@ -37,6 +39,8 @@ class SearchData {
       this.onlyShowWants,
       this.onlyShowFavourites,
       this.onlyShowTried,
-      this.activeFestivalName
+      this.activeFestivalName,
+      this.onlyShowGlutenFree,
+      this.onlyShowVegan
       );
 }

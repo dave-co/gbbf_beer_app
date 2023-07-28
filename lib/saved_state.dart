@@ -13,6 +13,7 @@ class SavedState{
   bool barSearch;
   bool styleSearch;
   bool countrySearch;
+  bool tagSearch;
 
   bool showHandpull;
   bool showKeyKeg;
@@ -24,6 +25,8 @@ class SavedState{
   bool onlyShowWants;
   bool onlyShowFavourites;
   bool onlyShowTried;
+  bool onlyShowGlutenFree;
+  bool onlyShowVegan;
 
   Map<String, List<BeerMeta>> beerMetaByFestival;
   // List<BeerMeta> beerMetaList;
@@ -37,6 +40,7 @@ class SavedState{
       this.barSearch,
       this.styleSearch,
       this.countrySearch,
+      this.tagSearch,
       this.showHandpull,
       this.showKeyKeg,
       this.showBottles,
@@ -45,7 +49,9 @@ class SavedState{
       this.onlyShowWants,
       this.onlyShowFavourites,
       this.onlyShowTried,
-      this.beerMetaByFestival
+      this.beerMetaByFestival,
+      this.onlyShowGlutenFree,
+      this.onlyShowVegan
       );
 
   Map toJson(){
@@ -66,6 +72,7 @@ class SavedState{
       "barSearch": barSearch,
       "styleSearch": styleSearch,
       "countrySearch": countrySearch,
+      "tagSearch": tagSearch,
       "showHandpull": showHandpull,
       "showKeyKeg": showKeyKeg,
       "showBottles": showBottles,
@@ -74,43 +81,23 @@ class SavedState{
       "onlyShowWants": onlyShowWants,
       "onlyShowFavourites": onlyShowFavourites,
       "onlyShowTried": onlyShowTried,
-      "beerMeta" : beerMeta
+      "beerMeta" : beerMeta,
+      "onlyShowGlutenFree": onlyShowGlutenFree,
+      "onlyShowVegan": onlyShowVegan
     };
   }
   factory SavedState.fromJson(dynamic json){
     debugPrint("SavedState.fromJson starting");
-    // var beerMetaJsonAll = json['beerMeta'] as Map<String, List<String>>;
     Map beerMetaJsonAll = json['beerMeta'];
-    // debugPrint("SavedState.fromJson beerMetaJsonAll=$beerMetaJsonAll");
-    // debugPrint("SavedState.fromJson beerMetaJsonAll.runtimeType=${beerMetaJsonAll.runtimeType}");
     Map<String, dynamic> test= beerMetaJsonAll.cast();
-    // debugPrint("SavedState.fromJson after cast test=$test");
     Map<String, List<BeerMeta>> output = {};
     for(var key in test.keys){
       List<BeerMeta> beerMeta = [];
-      // debugPrint("SavedState.fromJson key=$key");
       for(var entry in test[key]){
-        // debugPrint("SavedState.fromJson entry=$entry");
         beerMeta.add(BeerMeta.fromJson(entry));
       }
       output[key] = beerMeta;
     }
-    // debugPrint("SavedState.fromJson output=$output");
-
-    // for (var element in test.values) {
-    //   debugPrint("value=${element.runtimeType}");
-    //   List<dynamic> list = element;
-    //   for(var a in list){
-    //     debugPrint("a.type==${a.runtimeType}");
-    //   }
-    // }
-    // Map<String, List<BeerMeta>> beerMeta = beerMetaJsonAll.map(
-    //         (key, value) => MapEntry(key.toString(), value.map(
-    //                 (e) => BeerMeta.fromJson(e)).toList()
-    //         )
-    // );
-    // var beerMetaJsonAll = json['beerMeta'] as List;
-    // List<BeerMeta> beerMeta = beerMetaJsonAll.map((beerMetaJson) => BeerMeta.fromJson(beerMetaJson)).toList();
     return SavedState(
         json['festivalName'] as String,
         json['searchText'] as String,
@@ -120,6 +107,7 @@ class SavedState{
         json['barSearch'] as bool,
         json['styleSearch'] as bool,
         json['countrySearch'] as bool,
+        json['tagSearch'] == null ? false : json['tagSearch'] as bool,
         json['showHandpull'] as bool,
         json['showKeyKeg'] as bool,
         json['showBottles'] as bool,
@@ -128,8 +116,9 @@ class SavedState{
         json['onlyShowWants'] as bool,
         json['onlyShowFavourites'] as bool,
         json['onlyShowTried'] as bool,
-        output
-        // beerMeta
+        output,
+        json['onlyShowGlutenFree'] == null ? false : json['onlyShowGlutenFree'] as bool,
+        json['onlyShowVegan'] == null ? false : json['onlyShowVegan'] as bool
     );
   }
 }
