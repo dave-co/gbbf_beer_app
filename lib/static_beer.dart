@@ -16,10 +16,13 @@ class StaticBeer {
   String barName;
   String barLocation;
   List<String> tags;
+  bool vegan;
+  bool glutenFree;
 
   StaticBeer(this.id, this.name, this.abv, this.style, this.barCode, this.notes,
       this.brewery, this.country, this.untappdUrl, this.dispenseMethod,
-      this.colour, this.styleImage, this.barName, this.barLocation, this.tags);
+      this.colour, this.styleImage, this.barName, this.barLocation, this.tags,
+      this.vegan, this.glutenFree);
 
   factory StaticBeer.fromJson(dynamic json) {
     // debugPrint("json['id']=${json['id']}");
@@ -39,7 +42,9 @@ class StaticBeer {
         json['styleImage'] == null ? '' : json['styleImage'] as String,
         json['barName'] == null ? '' : json['barName'] as String,
         json['barLocation'] == null ? '' : json['barLocation'] as String,
-        tagListString
+        tagListString,
+        json['vegan'] == null ? false : json['vegan'] as bool,
+        json['glutenFree'] == null ? false : json['glutenFree'] as bool
     );
   }
 }

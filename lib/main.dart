@@ -66,6 +66,8 @@ class MyHomePage extends StatefulHookWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   static const String SPECIALITY_PREFIX = "Speciality - ";
+  static const String TAG_VEGAN = "Vegan";
+  static const String TAG_GLUTEN_FREE = "Gluten Free";
   bool stateInitialised = false;
   // List<StaticBeer> beers = [];
   List<StaticBeer> filteredBeers = [];
@@ -669,27 +671,42 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Widget> tags = [];
     for(String tagText in staticBeer.tags){
       TagColours tagColours = _getColors(tagText);
-      tags.add(Padding(
-          padding: const EdgeInsets.only(left: 5),
-          child: Chip(
-            label:Text(tagText,style: TextStyle(color: tagColours.textColor),),
-            elevation: 3,
-            backgroundColor: tagColours.backgroundColor,
-            // shape: const StadiumBorder(side: BorderSide()),
-          )
-      ));
+      tags.add(_createChip(tagText, tagColours));
+    }
+    if(staticBeer.glutenFree && !staticBeer.tags.contains(TAG_GLUTEN_FREE)){
+      String tagText = TAG_GLUTEN_FREE;
+      tags.add(_createChip(tagText, _getColors(tagText), image: Image.asset("assets/images/gluten-free.png").image));
+    }
+    if(staticBeer.vegan && !staticBeer.tags.contains(TAG_VEGAN)){
+      String tagText = TAG_VEGAN;
+      tags.add(_createChip(tagText, _getColors(tagText), image: Image.asset("assets/images/leaf.png").image));
     }
     return tags;
   }
+  Widget _createChip(String tagText, TagColours tagColours, {ImageProvider? image}){
+    CircleAvatar? avatar = (image == null) ? null : CircleAvatar(backgroundImage: image,);
+    return Padding(
+        padding: const EdgeInsets.only(left: 5),
+        child: Chip(
+          avatar: avatar,
+          label:Text(tagText, style: TextStyle(color: tagColours.textColor),),
+          elevation: 3,
+          backgroundColor: tagColours.backgroundColor,
+        )
+    );
+  }
+
   TagColours _getColors(String tag){
     Color altText = Colors.white;
     if(tag == 'Classic') return TagColours(Colors.teal, textColor: altText);
+    if(tag == 'Gluten Free') return TagColours(Colors.teal.shade700, textColor: altText);
     if(tag == 'Citrus') return TagColours(Colors.lime);
     if(tag == 'Session') return TagColours(Colors.lightGreen.shade300);
     if(tag == 'Hoppy') return TagColours(Colors.lightGreen);
     if(tag == 'Citra') return TagColours(Colors.lightGreen.shade700, textColor: altText);
     if(tag == 'Mosaic') return TagColours(Colors.lightGreen.shade800, textColor: altText);
     if(tag == 'Cascade') return TagColours(Colors.lightGreen.shade900, textColor: altText);
+    if(tag == 'Vegan') return TagColours(Colors.green, textColor: altText);
     if(tag == 'Pine') return TagColours(Colors.yellow.shade100);
     if(tag == 'Pale') return TagColours(Colors.yellowAccent.shade100);
     if(tag == 'Pale Ale') return TagColours(Colors.yellowAccent.shade100);
