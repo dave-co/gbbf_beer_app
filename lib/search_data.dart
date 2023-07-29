@@ -12,6 +12,9 @@ class SearchData {
   bool showHandpull;
   bool showKeyKeg;
   bool showBottles;
+  bool showCans;
+  bool showCiderPerry;
+  bool showUnknownDispense;
 
   double abvMin;
   double abvMax;
@@ -34,6 +37,9 @@ class SearchData {
       this.showHandpull,
       this.showKeyKeg,
       this.showBottles,
+      this.showCans,
+      this.showCiderPerry,
+      this.showUnknownDispense,
       this.abvMin,
       this.abvMax,
       this.onlyShowWants,

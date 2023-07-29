@@ -89,6 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showHandpull = true;
   bool showKeyKeg = true;
   bool showBottles = false;
+  bool showCans = false;
+  bool showCiderPerry = false;
+  bool showUnknownDispense = true;
 
   double abvMin = 4;
   double abvMax = 12;
@@ -157,6 +160,9 @@ class _MyHomePageState extends State<MyHomePage> {
       showHandpull = searchData.showHandpull;
       showKeyKeg = searchData.showKeyKeg;
       showBottles = searchData.showBottles;
+      showCans = searchData.showCans;
+      showCiderPerry = searchData.showCiderPerry;
+      showUnknownDispense = searchData.showUnknownDispense;
       abvMin = searchData.abvMin;
       abvMax = searchData.abvMax;
       onlyShowWants = searchData.onlyShowWants;
@@ -200,9 +206,12 @@ class _MyHomePageState extends State<MyHomePage> {
           return false;
         }
         // now check dispense method
-        if ((beer.dispenseMethod == "Handpull" || beer.dispenseMethod == "Cask") && !showHandpull ||
-            (beer.dispenseMethod == "KeyKeg" || beer.dispenseMethod == "Keg") && !showKeyKeg ||
-            (beer.dispenseMethod == "Bottle" || beer.dispenseMethod == "Can") && !showBottles) {
+        if (((beer.dispenseMethod == "Handpull" || beer.dispenseMethod == "Cask") && !showHandpull) ||
+            ((beer.dispenseMethod == "KeyKeg" || beer.dispenseMethod == "Keg") && !showKeyKeg) ||
+            (beer.dispenseMethod == "Bottle" && !showBottles) ||
+            (beer.dispenseMethod == "Can" && !showCans) ||
+            (beer.styleImage == "Cider Perry" && !showCiderPerry) ||
+            (beer.dispenseMethod == "null" && beer.styleImage != "Cider Perry" && !showUnknownDispense)) {
           return false;
         }
         BeerMeta beerMeta = meta[beer.id];
@@ -290,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }, [searchText, nameSearch, notesSearch, brewerySearch, barSearch,
       styleSearch, countrySearch, tagSearch, showHandpull, showKeyKeg, showBottles,
       abvMin, abvMax, onlyShowWants, onlyShowFavourites, onlyShowTried,
-      onlyShowGlutenFree, onlyShowVegan
+      onlyShowGlutenFree, onlyShowVegan, showCans, showCiderPerry, showUnknownDispense
     ]);
 
     // useEffect(() {
@@ -345,6 +354,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                     showHandpull,
                                     showKeyKeg,
                                     showBottles,
+                                    showCans,
+                                    showCiderPerry,
+                                    showUnknownDispense,
                                     abvMin,
                                     abvMax,
                                     onlyShowWants,
@@ -910,6 +922,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ,showHandpull
           ,showKeyKeg
           ,showBottles
+          ,showCans
+          ,showCiderPerry
+          ,showUnknownDispense
           ,abvMin
           ,abvMax
           ,onlyShowWants
@@ -956,12 +971,20 @@ class _MyHomePageState extends State<MyHomePage> {
         styleSearch = savedState.styleSearch;
         debugPrint("before countrySearch");
         countrySearch = savedState.countrySearch;
+        debugPrint("before tagSearch");
+        tagSearch = savedState.tagSearch;
         debugPrint("before showHandpull");
         showHandpull = savedState.showHandpull;
         debugPrint("before showKeyKeg");
         showKeyKeg = savedState.showKeyKeg;
         debugPrint("before showBottles");
         showBottles = savedState.showBottles;
+        debugPrint("before showCans");
+        showCans = savedState.showCans;
+        debugPrint("before showCiderPerry");
+        showCiderPerry = savedState.showCiderPerry;
+        debugPrint("before showUnknownDispense");
+        showUnknownDispense = savedState.showUnknownDispense;
         debugPrint("before abvMin");
         abvMin = savedState.abvMin;
         debugPrint("before abvMax");
@@ -972,6 +995,10 @@ class _MyHomePageState extends State<MyHomePage> {
         onlyShowFavourites = savedState.onlyShowFavourites;
         debugPrint("before onlyShowTried");
         onlyShowTried = savedState.onlyShowTried;
+        debugPrint("before onlyShowGlutenFree");
+        onlyShowGlutenFree = savedState.onlyShowGlutenFree;
+        debugPrint("before onlyShowVegan");
+        onlyShowVegan = savedState.onlyShowVegan;
         debugPrint("Saved state loaded");
         stateInitialised = true;
         // debugMeta();

@@ -18,6 +18,9 @@ class SavedState{
   bool showHandpull;
   bool showKeyKeg;
   bool showBottles;
+  bool showCans;
+  bool showCiderPerry;
+  bool showUnknownDispense;
 
   double abvMin;
   double abvMax;
@@ -44,6 +47,9 @@ class SavedState{
       this.showHandpull,
       this.showKeyKeg,
       this.showBottles,
+      this.showCans,
+      this.showCiderPerry,
+      this.showUnknownDispense,
       this.abvMin,
       this.abvMax,
       this.onlyShowWants,
@@ -76,6 +82,9 @@ class SavedState{
       "showHandpull": showHandpull,
       "showKeyKeg": showKeyKeg,
       "showBottles": showBottles,
+      "showCans": showCans,
+      "showCiderPerry": showCiderPerry,
+      "showUnknownDispense": showUnknownDispense,
       "abvMin": abvMin,
       "abvMax": abvMax,
       "onlyShowWants": onlyShowWants,
@@ -111,6 +120,9 @@ class SavedState{
         json['showHandpull'] as bool,
         json['showKeyKeg'] as bool,
         json['showBottles'] as bool,
+        json['showCans'] == null ? false: json['showCans'] as bool,
+        json['showCiderPerry'] == null ? false: json['showCiderPerry'] as bool,
+        json['showUnknownDispense'] == null ? true: json['showUnknownDispense'] as bool,
         json['abvMin'] as double,
         json['abvMax'] as double,
         json['onlyShowWants'] as bool,

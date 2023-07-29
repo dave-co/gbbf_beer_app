@@ -16,6 +16,9 @@ class Search extends StatefulWidget {
   final bool showHandpullParam;
   final bool showKeyKegParam;
   final bool showBottlesParam;
+  final bool showCansParam;
+  final bool showCiderPerryParam;
+  final bool showUnknownDispenseParam;
 
   final double abvMinParam;
   final double abvMaxParam;
@@ -39,6 +42,9 @@ class Search extends StatefulWidget {
       this.showHandpullParam,
       this.showKeyKegParam,
       this.showBottlesParam,
+      this.showCansParam,
+      this.showCiderPerryParam,
+      this.showUnknownDispenseParam,
       this.abvMinParam,
       this.abvMaxParam,
       this.onlyShowWantsParam,
@@ -69,6 +75,9 @@ class _CreateSearchState extends State<Search> {
   late bool showHandpull;
   late bool showKeyKeg;
   late bool showBottles;
+  late bool showCans;
+  late bool showCiderPerry;
+  late bool showUnknownDispense;
 
   // late double abvMin;
   // late double abvMax;
@@ -97,6 +106,9 @@ class _CreateSearchState extends State<Search> {
     showHandpull = widget.showHandpullParam;
     showKeyKeg = widget.showKeyKegParam;
     showBottles = widget.showBottlesParam;
+    showCans = widget.showCansParam;
+    showCiderPerry = widget.showCiderPerryParam;
+    showUnknownDispense = widget.showUnknownDispenseParam;
     // abvMin = widget.abvMinParam;
     // abvMax = widget.abvMaxParam;
     abvRange = RangeValues(widget.abvMinParam, widget.abvMaxParam);
@@ -127,6 +139,9 @@ class _CreateSearchState extends State<Search> {
               showHandpull,
               showKeyKeg,
               showBottles,
+              showCans,
+              showCiderPerry,
+              showUnknownDispense,
               abvRange.start,
               abvRange.end,
               onlyShowWants,
@@ -382,6 +397,46 @@ class _CreateSearchState extends State<Search> {
                                         onChanged: (bool? value){
                                           setState((){
                                             showHandpull = !showHandpull;
+                                          });
+                                        })
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                    flex: 2,
+                                    child: LabelledCheckbox(
+                                        text: const Text('Cans', textScaleFactor: 1.1,),
+                                        padding: const EdgeInsets.only(left: 1),
+                                        value: showCans,
+                                        onChanged: (bool? value){
+                                          setState((){
+                                            showCans = !showCans;
+                                          });
+                                        })
+                                ),
+                                Expanded(
+                                    flex: 2,
+                                    child: LabelledCheckbox(
+                                        text: const Text('Cider/Perry', textScaleFactor: 1.1,),
+                                        padding: const EdgeInsets.only(left: 1),
+                                        value: showCiderPerry,
+                                        onChanged: (bool? value){
+                                          setState((){
+                                            showCiderPerry = !showCiderPerry;
+                                          });
+                                        })
+                                ),
+                                Expanded(
+                                    flex: 2,
+                                    child: LabelledCheckbox(
+                                        text: const Text('Unknown', textScaleFactor: 1.1,),
+                                        padding: const EdgeInsets.only(left: 1),
+                                        value: showUnknownDispense,
+                                        onChanged: (bool? value){
+                                          setState((){
+                                            showUnknownDispense = !showUnknownDispense;
                                           });
                                         })
                                 ),
