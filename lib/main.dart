@@ -532,6 +532,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ImageProvider? img = (filteredBeers[i].styleImage == 'Cider Perry')
                 ? Image.asset('assets/images/cider-perry.png').image
                 : null;
+            Color avatarColour = _parseColour(filteredBeers[i].colour);
             return GestureDetector(
               onTap:  () =>
                   _updateMeta(
@@ -548,8 +549,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           shape: const CircleBorder(),
                           child: CircleAvatar(
                             backgroundImage: img,
-                            backgroundColor: _parseColour(filteredBeers[i].colour),
+                            backgroundColor: avatarColour,
                             maxRadius: 16,
+                            child: avatarColour == Colors.white ? const Icon(Icons.question_mark, color: Colors.black26,) : null,
                           )
                         )
                       ],)
