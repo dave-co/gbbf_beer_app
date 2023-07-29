@@ -517,6 +517,9 @@ class _MyHomePageState extends State<MyHomePage> {
           itemCount: filteredBeers.length,
           itemBuilder: (BuildContext context, int i) {
             var beerId = filteredBeers[i].id;
+            ImageProvider? img = (filteredBeers[i].styleImage == 'Cider Perry')
+                ? Image.asset('assets/images/cider-perry.png').image
+                : null;
             return GestureDetector(
               onTap:  () =>
                   _updateMeta(
@@ -528,9 +531,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     Expanded(
                       flex: 1,
                       child: Column(children: [
-                        CircleAvatar(
-                          backgroundColor: _parseColour(filteredBeers[i].colour),
-                          maxRadius: 16,
+                        Material(
+                          elevation: 3,
+                          shape: const CircleBorder(),
+                          child: CircleAvatar(
+                            backgroundImage: img,
+                            backgroundColor: _parseColour(filteredBeers[i].colour),
+                            maxRadius: 16,
+                          )
                         )
                       ],)
                     ),
