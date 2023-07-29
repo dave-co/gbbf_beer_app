@@ -471,6 +471,7 @@ class _CreateSearchState extends State<Search> {
                                       child: LabelledCheckbox(
                                           text: const Text('Want', textScaleFactor: 1.1,),
                                           padding: const EdgeInsets.only(left: 1),
+                                          inactiveColor: Colors.blue,
                                           value: onlyShowWants,
                                           onChanged: (bool? value){
                                             setState((){
@@ -483,6 +484,8 @@ class _CreateSearchState extends State<Search> {
                                       child: LabelledCheckbox(
                                           text: const Text('Tried', textScaleFactor: 1.1,),
                                           padding: const EdgeInsets.only(left: 1),
+                                          activeColor: Colors.orange,
+                                          inactiveColor: Colors.orange,
                                           value: onlyShowTried,
                                           onChanged: (bool? value){
                                             setState((){
@@ -495,6 +498,8 @@ class _CreateSearchState extends State<Search> {
                                       child: LabelledCheckbox(
                                           text: const Text('Favourite', textScaleFactor: 1.1,),
                                           padding: const EdgeInsets.only(left: 1),
+                                          activeColor: Colors.purple,
+                                          inactiveColor: Colors.purple,
                                           value: onlyShowFavourites,
                                           onChanged: (bool? value){
                                             setState((){
@@ -510,6 +515,8 @@ class _CreateSearchState extends State<Search> {
                                       child: LabelledCheckbox(
                                           text: const Text('Gluten Free', textScaleFactor: 1.1,),
                                           padding: const EdgeInsets.only(left: 1),
+                                          activeColor: Colors.teal.shade700,
+                                          inactiveColor: Colors.teal.shade700,
                                           value: onlyShowGlutenFree,
                                           onChanged: (bool? value){
                                             setState((){
@@ -522,6 +529,8 @@ class _CreateSearchState extends State<Search> {
                                       child: LabelledCheckbox(
                                           text: const Text('Vegan', textScaleFactor: 1.1,),
                                           padding: const EdgeInsets.only(left: 1),
+                                          activeColor: Colors.green,
+                                          inactiveColor: Colors.green,
                                           value: onlyShowVegan,
                                           onChanged: (bool? value){
                                             setState((){

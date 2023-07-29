@@ -9,6 +9,7 @@ class LabelledCheckbox extends StatelessWidget{
     required this.value,
     required this.onChanged,
     this.activeColor = Colors.blue,
+    this.inactiveColor = Colors.black54
   });
 
   final Text text;
@@ -16,6 +17,7 @@ class LabelledCheckbox extends StatelessWidget{
   final bool value;
   final ValueChanged<bool> onChanged;
   final Color activeColor;
+  final Color inactiveColor;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,7 @@ class LabelledCheckbox extends StatelessWidget{
         child: Row(
           children: <Widget>[
             Checkbox(
+              side: BorderSide(color: inactiveColor, width: 2),
               value: value,
               activeColor: activeColor,
               onChanged: (bool? newValue){

@@ -651,6 +651,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               child: LabelledCheckbox(
                                 text: const Text("Want", textScaleFactor: 1.1,),
                                 padding: const EdgeInsets.only(left: 1),
+                                inactiveColor: Colors.blue,
                                 value: getBeerMeta(beerId).want,
                                 onChanged: (bool? value) {
                                   _updateMeta(beerId, 'want',
@@ -663,6 +664,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 text: const Text("Tried", textScaleFactor: 1.1,),
                                 padding: const EdgeInsets.only(left: 1),
                                 activeColor: Colors.orange,
+                                inactiveColor: Colors.orange,
                                 value: getBeerMeta(beerId).tried,
                                 onChanged: (bool? value) {
                                   _updateMeta(beerId, 'tried',
@@ -676,6 +678,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 padding: const EdgeInsets.only(left: 1),
                                 value: getBeerMeta(beerId).favourite,
                                 activeColor: Colors.purple,
+                                inactiveColor: Colors.purple,
                                 onChanged: (bool? value) {
                                   _updateMeta(beerId, 'favourite',
                                       !getBeerMeta(beerId).favourite);
