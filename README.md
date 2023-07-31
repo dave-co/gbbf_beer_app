@@ -1,6 +1,8 @@
 # gbbf_beer_app
 
-A new Flutter project.
+A flutter app for tracking beers at the Great British Beer Festival.  Currently supports 2023 and 2022.
+
+Tested on Android, any other platform may or may not work.
 
 ## Getting Started
 

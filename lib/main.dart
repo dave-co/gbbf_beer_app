@@ -278,8 +278,16 @@ class _MyHomePageState extends State<MyHomePage> {
       beerMetaData = clone;
     });
   }
-  Future<void> _openUrl(StaticBeer staticBeer) async {
+  Future<void> _openGbbfUrl(StaticBeer staticBeer) async {
+    String url = "https://gbbf.org.uk/drinks/${staticBeer.id}/show";
+    _openUrl(url);
+  }
+  Future<void> _openUntappdUrl(StaticBeer staticBeer) async {
     String url = staticBeer.untappdUrl == '' ? _createUntappdSearchUrl(staticBeer) : staticBeer.untappdUrl;
+    _openUrl(url);
+  }
+
+  Future<void> _openUrl(String url) async {
     debugPrint("_openUrl url=$url");
     final parsedUrl = Uri.parse(url);
     await launchUrl(parsedUrl, mode: LaunchMode.externalApplication);
@@ -465,7 +473,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               Expanded(
                                   flex: 1,
                                   child: GestureDetector(
-                                    onTap: () => _openUrl(filteredBeers[i]),
+                                    onTap: () => _openUntappdUrl(filteredBeers[i]),
                                       child: Image.asset(
                                         filteredBeers[i].untappdUrl == null || filteredBeers[i].untappdUrl == ''
                                             ? 'assets/images/untappd-512-grey.png'
@@ -638,7 +646,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             Expanded(
                               flex: 1,
                               child: GestureDetector(
-                                onTap: () => _openUrl(filteredBeers[i]),
+                                onTap: () => _openUntappdUrl(filteredBeers[i]),
                                 child: Image.asset(
                                   filteredBeers[i].untappdUrl == null || filteredBeers[i].untappdUrl == ''
                                       ? 'assets/images/untappd-512-grey.png'
@@ -649,7 +657,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               )
                             ),
                             Expanded(
-                              flex: 2,
+                              flex: 3,
                               child: LabelledCheckbox(
                                 text: const Text("Want", textScaleFactor: 1.1,),
                                 padding: const EdgeInsets.only(left: 1),
@@ -661,7 +669,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 })
                             ),
                             Expanded(
-                              flex: 2,
+                              flex: 3,
                               child: LabelledCheckbox(
                                 text: const Text("Tried", textScaleFactor: 1.1,),
                                 padding: const EdgeInsets.only(left: 1),
@@ -674,7 +682,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 })
                             ),
                             Expanded(
-                              flex: 2,
+                              flex: 4,
                               child: LabelledCheckbox(
                                 text: const Text("Favourite", textScaleFactor: 1.1,),
                                 padding: const EdgeInsets.only(left: 1),
@@ -685,6 +693,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                   _updateMeta(beerId, 'favourite',
                                       !getBeerMeta(beerId).favourite);
                                 })
+                            ),
+                            Expanded(
+                                flex: 1,
+                                child: GestureDetector(
+                                    onTap: () => _openGbbfUrl(filteredBeers[i]),
+                                    child: Image.asset('assets/images/gbbf-logo.png',
+                                        height: 38,
+                                        width: 38
+                                    )
+                                )
                             ),
                           ],
                         ),

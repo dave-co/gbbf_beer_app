@@ -70,6 +70,7 @@ flutter:
     - assets/images/leaf.png
     - assets/images/gluten-free.png
     - assets/images/cider-perry.png
+    - assets/images/gbbf-logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
